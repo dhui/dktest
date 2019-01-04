@@ -20,8 +20,6 @@ const (
 )
 
 // ready functions
-func alwaysReady(dktest.ContainerInfo) bool { return true }
-func neverReady(dktest.ContainerInfo) bool  { return false }
 func nginxReady(c dktest.ContainerInfo) bool {
 	u := url.URL{Scheme: "http", Host: c.IP + ":" + c.Port}
 	if resp, err := http.Get(u.String()); err != nil {

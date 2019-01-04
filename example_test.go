@@ -32,7 +32,7 @@ func Example() {
 		})
 }
 
-func ExamplePostgres() {
+func Example_postgres() {
 	dockerImageName := "postgres:alpine"
 	password := "insecurepassword"
 	readyFunc := func(c dktest.ContainerInfo) bool {
@@ -41,7 +41,7 @@ func ExamplePostgres() {
 		if err != nil {
 			return false
 		}
-		defer db.Close()
+		defer db.Close() // nolint:errcheck
 		return db.Ping() == nil
 	}
 
@@ -53,7 +53,7 @@ func ExamplePostgres() {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Close()
+			defer db.Close() // nolint:errcheck
 			if err := db.Ping(); err != nil {
 				t.Fatal(err)
 			}

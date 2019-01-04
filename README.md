@@ -76,10 +76,12 @@ In the unlikely scenario where `dktest` leaves dangling containers,
 you can find and removing them by using the `dktest` label:
 
 ```shell
-# find dangling containers
-$ docker ps -a -f label=dktest
+# list dangling containers
+$ docker ps -a --filter label=dktest
+# stop dangling containers
+$ docker ps --filter label=dktest | awk '{print $1}' | grep -v CONTAINER | xargs docker stop
 # remove dangling containers
-$ docker container prune -f label=dktest
+$ docker container prune --filter label=dktest
 ```
 
 ## Roadmap

@@ -30,6 +30,8 @@ func Example() {
 		func(t *testing.T, c dktest.ContainerInfo) {
 			// test code here
 		})
+
+	// Output:
 }
 
 func Example_postgres() {
@@ -58,4 +60,6 @@ func Example_postgres() {
 			}
 			// Test using db
 		})
+
+	// Output:
 }

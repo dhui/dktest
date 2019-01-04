@@ -13,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func Example() {
+func Example_nginx() {
 	dockerImageName := "nginx:alpine"
 	readyFunc := func(c dktest.ContainerInfo) bool {
 		u := url.URL{Scheme: "http", Host: c.IP + ":" + c.Port}

@@ -34,9 +34,8 @@ func Example() {
 
 func Example_postgres() {
 	dockerImageName := "postgres:alpine"
-	password := "insecurepassword"
 	readyFunc := func(c dktest.ContainerInfo) bool {
-		connStr := fmt.Sprintf("host=%s port=%s user=postgres password=%s", c.IP, c.Port, password)
+		connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", c.IP, c.Port)
 		db, err := sql.Open("postgres", connStr)
 		if err != nil {
 			return false
@@ -48,7 +47,7 @@ func Example_postgres() {
 	// dktest.Run() should be used within a test
 	dktest.Run(&testing.T{}, dockerImageName, dktest.Options{PortRequired: true, ReadyFunc: readyFunc},
 		func(t *testing.T, c dktest.ContainerInfo) {
-			connStr := fmt.Sprintf("host=%s port=%s user=postgres password=%s", c.IP, c.Port, password)
+			connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", c.IP, c.Port)
 			db, err := sql.Open("postgres", connStr)
 			if err != nil {
 				t.Fatal(err)

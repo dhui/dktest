@@ -91,6 +91,7 @@ $ docker container prune --filter label=dktest
 * [ ] Add more `Options`
   * [ ] Volume mounts
   * [ ] Network config
+* [ ] Support testing against multiple containers. It can be faked for now by nested/recursive `Run()` calls but that serializes the containers' startup time.
 
 ## Comparison to [dockertest](https://github.com/ory/dockertest)
 

@@ -10,9 +10,11 @@ import (
 
 // Options contains the configurable options for running tests in the docker image
 type Options struct {
-	Timeout   time.Duration
-	ReadyFunc func(ContainerInfo) bool
-	Env       map[string]string
+	Timeout    time.Duration
+	ReadyFunc  func(ContainerInfo) bool
+	Env        map[string]string
+	Entrypoint []string
+	Cmd        []string
 	// If you prefer to specify your port bindings as a string, use nat.ParsePortSpecs()
 	PortBindings nat.PortMap
 	PortRequired bool

@@ -94,7 +94,7 @@ $ docker container prune --filter label=dktest
 
 ## Roadmap
 
-* [ ] Support multiple ports in `ContainerInfo`
+* [x] Support multiple ports in `ContainerInfo`
 * [ ] Use non-default network
 * [ ] Add more `Options`
   * [ ] Volume mounts

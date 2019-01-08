@@ -35,14 +35,14 @@ func pullImage(ctx context.Context, lgr logger, dc client.ImageAPIClient, imgNam
 	}
 	defer func() {
 		if err := resp.Close(); err != nil {
-			lgr.Log("Failed to close image:", err)
+			lgr.Log("Failed to close image response:", err)
 		}
 	}()
 
 	// Log response
 	b := strings.Builder{}
 	if err := jsonmessage.DisplayJSONMessagesStream(resp, &b, 0, false, nil); err == nil {
-		lgr.Log(b.String())
+		lgr.Log("Image pull response:", b.String())
 	} else {
 		lgr.Log("Error parsing image pull response:", err)
 	}
@@ -67,11 +67,12 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 		return c, err
 	}
 	c.ID = createResp.ID
-	lgr.Log("Created container.", c.String())
+	lgr.Log("Created container:", c.String())
 
 	if err := dc.ContainerStart(ctx, createResp.ID, types.ContainerStartOptions{}); err != nil {
 		return c, err
 	}
+	lgr.Log("Started container:", c.String())
 
 	if !opts.PortRequired {
 		return c, nil
@@ -81,6 +82,8 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 	if err != nil {
 		return c, err
 	}
+	lgr.Log("Inspected container:", c.String())
+
 	if inspectResp.NetworkSettings == nil {
 		return c, errNoNetworkSettings
 	}
@@ -102,7 +105,7 @@ func stopContainer(ctx context.Context, lgr logger, dc client.ContainerAPIClient
 				}
 			}()
 			if err == nil {
-				lgr.Log(string(b))
+				lgr.Log("Container logs:", string(b))
 			} else {
 				lgr.Log("Error reading container logs:", err)
 			}
@@ -139,7 +142,7 @@ func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
 				return true
 			}
 		case <-ctx.Done():
-			lgr.Log("Container was never ready.", c.String())
+			lgr.Log("Container was never ready:", c.String())
 			return false
 		}
 	}

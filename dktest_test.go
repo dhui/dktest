@@ -21,7 +21,11 @@ const (
 
 // ready functions
 func nginxReady(c dktest.ContainerInfo) bool {
-	u := url.URL{Scheme: "http", Host: c.IP + ":" + c.Port}
+	ip, port, err := c.FirstPort()
+	if err != nil {
+		return false
+	}
+	u := url.URL{Scheme: "http", Host: ip + ":" + port}
 	if resp, err := http.Get(u.String()); err != nil {
 		return false
 	} else if resp.StatusCode != 200 {

@@ -2,8 +2,6 @@ package dktest
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -22,27 +20,9 @@ var (
 	DefaultTimeout = time.Minute
 )
 
-var (
-	errNoNetworkSettings = errors.New("no network settings")
-	errNoPorts           = errors.New("no ports")
-)
-
 const (
 	label = "dktest"
 )
-
-// ContainerInfo holds information about a running Docker container
-type ContainerInfo struct {
-	ID        string
-	Name      string
-	ImageName string
-	IP        string
-	Port      string
-}
-
-func (c ContainerInfo) String() string {
-	return fmt.Sprintf("%#v", c)
-}
 
 func pullImage(ctx context.Context, lgr logger, dc client.ImageAPIClient, imgName string) error {
 	lgr.Log("Pulling image:", imgName)
@@ -92,34 +72,18 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 		return c, err
 	}
 
+	if !opts.PortRequired {
+		return c, nil
+	}
+
 	inspectResp, err := dc.ContainerInspect(ctx, c.ID)
 	if err != nil {
 		return c, err
 	}
 	if inspectResp.NetworkSettings == nil {
-		if opts.PortRequired {
-			return c, errNoNetworkSettings
-		}
-		return c, nil
+		return c, errNoNetworkSettings
 	}
-
-portScan:
-	for _, portBindings := range inspectResp.NetworkSettings.Ports {
-		for _, portBinding := range portBindings {
-			switch portBinding.HostIP {
-			case "", "0.0.0.0":
-				c.IP = "127.0.0.1"
-			default:
-				c.IP = portBinding.HostIP
-			}
-			c.Port = portBinding.HostPort
-			break portScan
-		}
-	}
-
-	if opts.PortRequired && c.Port == "" {
-		return c, errNoPorts
-	}
+	c.Ports = inspectResp.NetworkSettings.Ports
 
 	return c, nil
 }

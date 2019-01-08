@@ -16,7 +16,11 @@ import (
 func Example_nginx() {
 	dockerImageName := "nginx:alpine"
 	readyFunc := func(c dktest.ContainerInfo) bool {
-		u := url.URL{Scheme: "http", Host: c.IP + ":" + c.Port}
+		ip, port, err := c.FirstPort()
+		if err != nil {
+			return false
+		}
+		u := url.URL{Scheme: "http", Host: ip + ":" + port}
 		if resp, err := http.Get(u.String()); err != nil {
 			return false
 		} else if resp.StatusCode != 200 {
@@ -37,7 +41,11 @@ func Example_nginx() {
 func Example_postgres() {
 	dockerImageName := "postgres:alpine"
 	readyFunc := func(c dktest.ContainerInfo) bool {
-		connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", c.IP, c.Port)
+		ip, port, err := c.FirstPort()
+		if err != nil {
+			return false
+		}
+		connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", ip, port)
 		db, err := sql.Open("postgres", connStr)
 		if err != nil {
 			return false
@@ -49,7 +57,11 @@ func Example_postgres() {
 	// dktest.Run() should be used within a test
 	dktest.Run(&testing.T{}, dockerImageName, dktest.Options{PortRequired: true, ReadyFunc: readyFunc},
 		func(t *testing.T, c dktest.ContainerInfo) {
-			connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", c.IP, c.Port)
+			ip, port, err := c.FirstPort()
+			if err != nil {
+				t.Fatal(err)
+			}
+			connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", ip, port)
 			db, err := sql.Open("postgres", connStr)
 			if err != nil {
 				t.Fatal(err)

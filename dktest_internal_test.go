@@ -113,16 +113,11 @@ func TestRunImage(t *testing.T) {
 		{name: "start error", client: mockdockerclient.ContainerAPIClient{
 			CreateResp: successCreateResp, StartErr: mockdockerclient.Err, InspectResp: successInspectResp,
 		}, expectErr: true},
-		{name: "inspect error", client: mockdockerclient.ContainerAPIClient{
-			CreateResp: successCreateResp,
-		}, expectErr: true},
+		{name: "inspect error", client: mockdockerclient.ContainerAPIClient{CreateResp: successCreateResp},
+			opts: Options{PortRequired: true}, expectErr: true},
 		{name: "no network settings error", client: mockdockerclient.ContainerAPIClient{
 			CreateResp: successCreateResp, InspectResp: successInspectResp}, opts: Options{PortRequired: true},
 			expectErr: true},
-		{name: "no ports error", client: mockdockerclient.ContainerAPIClient{
-			CreateResp:  successCreateResp,
-			InspectResp: &types.ContainerJSON{NetworkSettings: &types.NetworkSettings{}}},
-			opts: Options{PortRequired: true}, expectErr: true},
 	}
 
 	ctx := context.Background()

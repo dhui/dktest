@@ -78,6 +78,21 @@ func Test(t *testing.T) {
 
 For more examples, see the [docs](https://godoc.org/github.com/dhui/dktest).
 
+## Debugging tests
+
+Running `go test` with the `-v` option will display the container lifecycle log statements
+along with the container ID.
+
+### Short lived tests/containers
+
+Run `go test` with the `-v` option and specify the `LogStdout` and/or `LogStderr` `Options`
+to see the container's logs.
+
+### Interactive tests/containers
+
+Run `go test` with the `-v` option to get the container ID and check the container's logs with
+`docker logs -f $CONTAINER_ID`.
+
 ## Cleaning up dangling containers
 
 In the unlikely scenario where `dktest` leaves dangling containers,

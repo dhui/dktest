@@ -20,6 +20,7 @@ type ContainerAPIClient struct {
 	StopErr     error
 	RemoveErr   error
 	InspectResp *types.ContainerJSON
+	Logs        io.ReadCloser
 }
 
 // ContainerAttach is a mock implementation of Docker's client.ContainerAPIClient.ContainerAttach()
@@ -134,11 +135,12 @@ func (c *ContainerAPIClient) ContainerList(context.Context,
 }
 
 // ContainerLogs is a mock implementation of Docker's client.ContainerAPIClient.ContainerLogs()
-//
-// TODO: properly implement
 func (c *ContainerAPIClient) ContainerLogs(context.Context, string,
 	types.ContainerLogsOptions) (io.ReadCloser, error) {
-	return nil, nil
+	if c.Logs == nil {
+		return nil, Err
+	}
+	return c.Logs, nil
 }
 
 // ContainerPause is a mock implementation of Docker's client.ContainerAPIClient.ContainerPause()

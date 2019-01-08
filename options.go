@@ -18,6 +18,8 @@ type Options struct {
 	// If you prefer to specify your port bindings as a string, use nat.ParsePortSpecs()
 	PortBindings nat.PortMap
 	PortRequired bool
+	LogStdout    bool
+	LogStderr    bool
 }
 
 func (o *Options) init() {

@@ -130,11 +130,21 @@ func TestRunImage(t *testing.T) {
 }
 
 func TestStopContainer(t *testing.T) {
+	successReadCloser := mockdockerclient.MockReadCloser{MockReader: mockdockerclient.MockReader{Err: io.EOF}}
+	readCloserReadErr := mockdockerclient.MockReadCloser{
+		MockReader: mockdockerclient.MockReader{Err: mockdockerclient.Err}}
+
 	testCases := []struct {
 		name   string
 		client mockdockerclient.ContainerAPIClient
+		log    bool
 	}{
 		{name: "success", client: mockdockerclient.ContainerAPIClient{}},
+		{name: "success - log fetch error", client: mockdockerclient.ContainerAPIClient{}, log: true},
+		{name: "success - log fetch success - read error",
+			client: mockdockerclient.ContainerAPIClient{Logs: readCloserReadErr}, log: true},
+		{name: "success - log fetch success - read success",
+			client: mockdockerclient.ContainerAPIClient{Logs: successReadCloser}, log: true},
 		{name: "stop error", client: mockdockerclient.ContainerAPIClient{StopErr: mockdockerclient.Err}},
 		{name: "remove error", client: mockdockerclient.ContainerAPIClient{RemoveErr: mockdockerclient.Err}},
 	}
@@ -142,7 +152,7 @@ func TestStopContainer(t *testing.T) {
 	ctx := context.Background()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			stopContainer(ctx, t, &tc.client, containerInfo)
+			stopContainer(ctx, t, &tc.client, containerInfo, tc.log, tc.log)
 		})
 	}
 }

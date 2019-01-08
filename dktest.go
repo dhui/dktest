@@ -2,6 +2,7 @@ package dktest
 
 import (
 	"context"
+	"io/ioutil"
 	"strings"
 	"testing"
 	"time"
@@ -88,7 +89,24 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 	return c, nil
 }
 
-func stopContainer(ctx context.Context, lgr logger, dc client.ContainerAPIClient, c ContainerInfo) {
+func stopContainer(ctx context.Context, lgr logger, dc client.ContainerAPIClient, c ContainerInfo,
+	logStdout, logStderr bool) {
+	if logStdout || logStderr {
+		if logs, err := dc.ContainerLogs(ctx, c.ID, types.ContainerLogsOptions{
+			Timestamps: true, ShowStdout: logStdout, ShowStderr: logStderr,
+		}); err == nil {
+			b, err := ioutil.ReadAll(logs)
+			defer logs.Close()
+			if err == nil {
+				lgr.Log(string(b))
+			} else {
+				lgr.Log("Error reading container logs:", err)
+			}
+		} else {
+			lgr.Log("Error fetching container logs:", err)
+		}
+	}
+
 	if err := dc.ContainerStop(ctx, c.ID, nil); err != nil {
 		lgr.Log("Error stopping container:", c.String(), "error:", err)
 	}
@@ -143,7 +161,7 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 		if err != nil {
 			t.Fatal("Failed to run image:", imgName, "error:", err)
 		}
-		defer stopContainer(ctx, t, dc, c)
+		defer stopContainer(ctx, t, dc, c, opts.LogStdout, opts.LogStderr)
 
 		if waitContainerReady(ctx, t, c, opts.ReadyFunc) {
 			testFunc(t, c)

@@ -17,8 +17,12 @@ import (
 )
 
 var (
-	// DefaultTimeout is the default timeout to use
+	// DefaultPullTimeout is the default timeout used when pulling images
+	DefaultPullTimeout = time.Minute
+	// DefaultTimeout is the default timeout used when starting a container and checking if it's ready
 	DefaultTimeout = time.Minute
+	// DefaultCleanupTimeout is the default timeout used when stopping and removing a container
+	DefaultCleanupTimeout = 15 * time.Second
 )
 
 const (
@@ -156,21 +160,28 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 	}
 
 	opts.init()
-	ctx, cancelFunc := context.WithTimeout(context.Background(), opts.Timeout)
-	defer cancelFunc()
+	pullCtx, pullTimeoutCancelFunc := context.WithTimeout(context.Background(), opts.PullTimeout)
+	defer pullTimeoutCancelFunc()
 
-	if err := pullImage(ctx, t, dc, imgName); err != nil {
+	if err := pullImage(pullCtx, t, dc, imgName); err != nil {
 		t.Fatal("Failed to pull image:", imgName, "error:", err)
 	}
 
 	func() {
-		c, err := runImage(ctx, t, dc, imgName, opts)
+		runCtx, runTimeoutCancelFunc := context.WithTimeout(context.Background(), opts.Timeout)
+		defer runTimeoutCancelFunc()
+
+		c, err := runImage(runCtx, t, dc, imgName, opts)
 		if err != nil {
 			t.Fatal("Failed to run image:", imgName, "error:", err)
 		}
-		defer stopContainer(ctx, t, dc, c, opts.LogStdout, opts.LogStderr)
+		defer func() {
+			stopCtx, stopTimeoutCancelFunc := context.WithTimeout(context.Background(), opts.CleanupTimeout)
+			defer stopTimeoutCancelFunc()
+			stopContainer(stopCtx, t, dc, c, opts.LogStdout, opts.LogStderr)
+		}()
 
-		if waitContainerReady(ctx, t, c, opts.ReadyFunc) {
+		if waitContainerReady(runCtx, t, c, opts.ReadyFunc) {
 			testFunc(t, c)
 		} else {
 			t.Fatal("Container was never ready before timing out:", c.String())

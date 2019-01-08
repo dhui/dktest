@@ -17,8 +17,16 @@ func TestOptionsInit(t *testing.T) {
 		opts     Options
 		expected Options
 	}{
-		{name: "default timeout used", opts: Options{}, expected: Options{Timeout: DefaultTimeout}},
-		{name: "default timeout not used", opts: Options{Timeout: timeout}, expected: Options{Timeout: timeout}},
+		{name: "default timeouts used", opts: Options{},
+			expected: Options{
+				PullTimeout:    DefaultPullTimeout,
+				Timeout:        DefaultTimeout,
+				CleanupTimeout: DefaultCleanupTimeout,
+			},
+		},
+		{name: "default timeouts not used",
+			opts:     Options{PullTimeout: timeout, Timeout: timeout, CleanupTimeout: timeout},
+			expected: Options{PullTimeout: timeout, Timeout: timeout, CleanupTimeout: timeout}},
 	}
 
 	for _, tc := range testCases {

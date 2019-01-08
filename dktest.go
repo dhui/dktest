@@ -96,7 +96,11 @@ func stopContainer(ctx context.Context, lgr logger, dc client.ContainerAPIClient
 			Timestamps: true, ShowStdout: logStdout, ShowStderr: logStderr,
 		}); err == nil {
 			b, err := ioutil.ReadAll(logs)
-			defer logs.Close()
+			defer func() {
+				if err := logs.Close(); err != nil {
+					lgr.Log("Error closing logs:", err)
+				}
+			}()
 			if err == nil {
 				lgr.Log(string(b))
 			} else {

@@ -133,6 +133,9 @@ func TestStopContainer(t *testing.T) {
 	successReadCloser := mockdockerclient.MockReadCloser{MockReader: mockdockerclient.MockReader{Err: io.EOF}}
 	readCloserReadErr := mockdockerclient.MockReadCloser{
 		MockReader: mockdockerclient.MockReader{Err: mockdockerclient.Err}}
+	readCloserCloseErr := mockdockerclient.MockReadCloser{
+		MockReader: mockdockerclient.MockReader{Err: io.EOF},
+		MockCloser: mockdockerclient.MockCloser{Err: mockdockerclient.Err}}
 
 	testCases := []struct {
 		name   string
@@ -145,6 +148,8 @@ func TestStopContainer(t *testing.T) {
 			client: mockdockerclient.ContainerAPIClient{Logs: readCloserReadErr}, log: true},
 		{name: "success - log fetch success - read success",
 			client: mockdockerclient.ContainerAPIClient{Logs: successReadCloser}, log: true},
+		{name: "success - log fetch success - close error",
+			client: mockdockerclient.ContainerAPIClient{Logs: readCloserCloseErr}, log: true},
 		{name: "stop error", client: mockdockerclient.ContainerAPIClient{StopErr: mockdockerclient.Err}},
 		{name: "remove error", client: mockdockerclient.ContainerAPIClient{RemoveErr: mockdockerclient.Err}},
 	}

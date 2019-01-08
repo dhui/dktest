@@ -42,7 +42,11 @@ import (
 )
 
 func pgReady(c dktest.ContainerInfo) bool {
-    connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", c.IP, c.Port)
+    ip, port, err := c.FirstPort()
+    if err != nil {
+        return false
+    }
+    connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", ip, port)
     db, err := sql.Open("postgres", connStr)
     if err != nil {
         return false
@@ -54,7 +58,11 @@ func pgReady(c dktest.ContainerInfo) bool {
 func Test(t *testing.T) {
     dktest.Run(t, "postgres:alpine", dktest.Options{PortRequired: true, ReadyFunc: pgReady},
         func(t *testing.T, c dktest.ContainerInfo) {
-        connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", c.IP, c.Port)
+        ip, port, err := c.FirstPort()
+        if err != nil {
+            t.Fatal(err)
+        }
+        connStr := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", ip, port)
         db, err := sql.Open("postgres", connStr)
         if err != nil {
             t.Fatal(err)

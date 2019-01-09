@@ -34,14 +34,17 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 ## Example Usage
 
 ```golang
-import "testing"
+import (
+    "context"
+    "testing"
+)
 
 import (
     "github.com/dhui/dktest"
     _ "github.com/lib/pq"
 )
 
-func pgReady(c dktest.ContainerInfo) bool {
+func pgReady(ctx context.Context, c dktest.ContainerInfo) bool {
     ip, port, err := c.FirstPort()
     if err != nil {
         return false
@@ -52,7 +55,7 @@ func pgReady(c dktest.ContainerInfo) bool {
         return false
     }
     defer db.Close()
-    return db.Ping() == nil
+    return db.PingContext(ctx) == nil
 }
 
 func Test(t *testing.T) {

@@ -21,6 +21,9 @@ var (
 	DefaultPullTimeout = time.Minute
 	// DefaultTimeout is the default timeout used when starting a container and checking if it's ready
 	DefaultTimeout = time.Minute
+	// DefaultReadyTimeout is the default timeout used for each container ready check.
+	// e.g. each invocation of the ReadyFunc
+	DefaultReadyTimeout = 2 * time.Second
 	// DefaultCleanupTimeout is the default timeout used when stopping and removing a container
 	DefaultCleanupTimeout = 15 * time.Second
 )
@@ -131,7 +134,7 @@ func stopContainer(ctx context.Context, lgr logger, dc client.ContainerAPIClient
 }
 
 func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
-	readyFunc func(ContainerInfo) bool) bool {
+	readyFunc func(context.Context, ContainerInfo) bool, readyTimeout time.Duration) bool {
 	if readyFunc == nil {
 		return true
 	}
@@ -142,7 +145,10 @@ func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
 	for {
 		select {
 		case <-ticker.C:
-			if readyFunc(c) {
+			readyCtx, canceledFunc := context.WithTimeout(ctx, readyTimeout)
+			defer canceledFunc()
+
+			if readyFunc(readyCtx, c) {
 				return true
 			}
 		case <-ctx.Done():
@@ -181,7 +187,7 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 			stopContainer(stopCtx, t, dc, c, opts.LogStdout, opts.LogStderr)
 		}()
 
-		if waitContainerReady(runCtx, t, c, opts.ReadyFunc) {
+		if waitContainerReady(runCtx, t, c, opts.ReadyFunc, opts.ReadyTimeout) {
 			testFunc(t, c)
 		} else {
 			t.Fatal("Container was never ready before timing out:", c.String())

@@ -1,6 +1,8 @@
 package dktest_test
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
@@ -20,13 +22,21 @@ const (
 )
 
 // ready functions
-func nginxReady(c dktest.ContainerInfo) bool {
+func nginxReady(ctx context.Context, c dktest.ContainerInfo) bool {
 	ip, port, err := c.FirstPort()
 	if err != nil {
 		return false
 	}
 	u := url.URL{Scheme: "http", Host: ip + ":" + port}
-	if resp, err := http.Get(u.String()); err != nil {
+	fmt.Println(u.String())
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		fmt.Println("req err", err)
+		return false
+	}
+	req = req.WithContext(ctx)
+	if resp, err := http.DefaultClient.Do(req); err != nil {
+		fmt.Println("do err:", err)
 		return false
 	} else if resp.StatusCode != 200 {
 		return false

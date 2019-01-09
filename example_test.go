@@ -1,6 +1,7 @@
 package dktest_test
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -15,13 +16,19 @@ import (
 
 func Example_nginx() {
 	dockerImageName := "nginx:alpine"
-	readyFunc := func(c dktest.ContainerInfo) bool {
+	readyFunc := func(ctx context.Context, c dktest.ContainerInfo) bool {
 		ip, port, err := c.FirstPort()
 		if err != nil {
 			return false
 		}
 		u := url.URL{Scheme: "http", Host: ip + ":" + port}
-		if resp, err := http.Get(u.String()); err != nil {
+		req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+		if err != nil {
+			fmt.Println(err)
+			return false
+		}
+		req = req.WithContext(ctx)
+		if resp, err := http.DefaultClient.Do(req); err != nil {
 			return false
 		} else if resp.StatusCode != 200 {
 			return false
@@ -40,7 +47,7 @@ func Example_nginx() {
 
 func Example_postgres() {
 	dockerImageName := "postgres:alpine"
-	readyFunc := func(c dktest.ContainerInfo) bool {
+	readyFunc := func(ctx context.Context, c dktest.ContainerInfo) bool {
 		ip, port, err := c.FirstPort()
 		if err != nil {
 			return false
@@ -51,7 +58,7 @@ func Example_postgres() {
 			return false
 		}
 		defer db.Close() // nolint:errcheck
-		return db.Ping() == nil
+		return db.PingContext(ctx) == nil
 	}
 
 	// dktest.Run() should be used within a test

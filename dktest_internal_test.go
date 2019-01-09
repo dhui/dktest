@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"testing"
+	"time"
 )
 
 import (
@@ -25,8 +26,8 @@ var (
 )
 
 // ready functions
-func alwaysReady(ContainerInfo) bool { return true }
-func neverReady(ContainerInfo) bool  { return false }
+func alwaysReady(context.Context, ContainerInfo) bool { return true }
+func neverReady(context.Context, ContainerInfo) bool  { return false }
 
 func testErr(t *testing.T, err error, expectErr bool) {
 	t.Helper()
@@ -169,7 +170,7 @@ func TestWaitContainerReady(t *testing.T) {
 	testCases := []struct {
 		name        string
 		ctx         context.Context
-		readyFunc   func(ContainerInfo) bool
+		readyFunc   func(context.Context, ContainerInfo) bool
 		expectReady bool
 	}{
 		{name: "nil readyFunc", ctx: canceledCtx, readyFunc: nil, expectReady: true},
@@ -179,7 +180,8 @@ func TestWaitContainerReady(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if ready := waitContainerReady(tc.ctx, t, containerInfo, tc.readyFunc); ready && !tc.expectReady {
+			if ready := waitContainerReady(tc.ctx, t, containerInfo, tc.readyFunc,
+				time.Second); ready && !tc.expectReady {
 				t.Error("Expected container to not be ready but it was")
 			} else if !ready && tc.expectReady {
 				t.Error("Expected container to ready but it wasn't")

@@ -1,6 +1,7 @@
 package dktest
 
 import (
+	"context"
 	"time"
 )
 
@@ -14,9 +15,12 @@ type Options struct {
 	PullTimeout time.Duration
 	// Timeout is the timeout used when starting a container and checking if it's ready
 	Timeout time.Duration
+	// ReadyTimeout is the timeout used for each container ready check.
+	// e.g. each invocation of the ReadyFunc
+	ReadyTimeout time.Duration
 	// CleanupTimeout is the timeout used when stopping and removing a container
 	CleanupTimeout time.Duration
-	ReadyFunc      func(ContainerInfo) bool
+	ReadyFunc      func(context.Context, ContainerInfo) bool
 	Env            map[string]string
 	Entrypoint     []string
 	Cmd            []string
@@ -33,6 +37,9 @@ func (o *Options) init() {
 	}
 	if o.Timeout <= 0 {
 		o.Timeout = DefaultTimeout
+	}
+	if o.ReadyTimeout <= 0 {
+		o.ReadyTimeout = DefaultReadyTimeout
 	}
 	if o.CleanupTimeout <= 0 {
 		o.CleanupTimeout = DefaultCleanupTimeout

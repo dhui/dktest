@@ -145,10 +145,7 @@ func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
 	for {
 		select {
 		case <-ticker.C:
-			readyCtx, canceledFunc := context.WithTimeout(ctx, readyTimeout)
-			defer canceledFunc()
-
-			if readyFunc(readyCtx, c) {
+			if runReadyFunc(ctx, c, readyFunc, readyTimeout) {
 				return true
 			}
 		case <-ctx.Done():
@@ -156,6 +153,12 @@ func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
 			return false
 		}
 	}
+}
+
+func runReadyFunc(ctx context.Context, c ContainerInfo, readyFunc func(context.Context, ContainerInfo) bool, timeout time.Duration) bool {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	return readyFunc(ctx, c)
 }
 
 // Run runs the given test function once the specified Docker image is running in a container

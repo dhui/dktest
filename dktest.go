@@ -145,10 +145,13 @@ func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
 	for {
 		select {
 		case <-ticker.C:
-			readyCtx, canceledFunc := context.WithTimeout(ctx, readyTimeout)
-			defer canceledFunc()
+			ready := func() bool {
+				readyCtx, canceledFunc := context.WithTimeout(ctx, readyTimeout)
+				defer canceledFunc()
+				return readyFunc(readyCtx, c)
+			}()
 
-			if readyFunc(readyCtx, c) {
+			if ready {
 				return true
 			}
 		case <-ctx.Done():

@@ -29,6 +29,7 @@ type Options struct {
 	PortRequired bool
 	LogStdout    bool
 	LogStderr    bool
+	ShmSize      int64
 }
 
 func (o *Options) init() {

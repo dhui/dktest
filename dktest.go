@@ -69,6 +69,7 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 	}, &container.HostConfig{
 		PublishAllPorts: true,
 		PortBindings:    opts.PortBindings,
+		ShmSize:         opts.ShmSize,
 	}, &network.NetworkingConfig{}, c.Name)
 	if err != nil {
 		return c, err

@@ -1,6 +1,6 @@
 # dktest
 
-[![Build Status](https://img.shields.io/travis/dhui/dktest/master.svg)](https://travis-ci.org/dhui/dktest) [![Code Coverage](https://img.shields.io/codecov/c/github/dhui/dktest.svg)](https://codecov.io/gh/dhui/dktest) [![GoDoc](https://godoc.org/github.com/dhui/dktest?status.svg)](https://godoc.org/github.com/dhui/dktest) [![Go Report Card](https://goreportcard.com/badge/github.com/dhui/dktest)](https://goreportcard.com/report/github.com/dhui/dktest) [![GitHub Release](https://img.shields.io/github/release/dhui/dktest/all.svg)](https://github.com/dhui/dktest/releases) ![Supported Go versions](https://img.shields.io/badge/Go-1.11%2C%201.12-lightgrey.svg)
+[![Build Status](https://img.shields.io/travis/dhui/dktest/master.svg)](https://travis-ci.org/dhui/dktest) [![Code Coverage](https://img.shields.io/codecov/c/github/dhui/dktest.svg)](https://codecov.io/gh/dhui/dktest) [![GoDoc](https://godoc.org/github.com/dhui/dktest?status.svg)](https://godoc.org/github.com/dhui/dktest) [![Go Report Card](https://goreportcard.com/badge/github.com/dhui/dktest)](https://goreportcard.com/report/github.com/dhui/dktest) [![GitHub Release](https://img.shields.io/github/release/dhui/dktest/all.svg)](https://github.com/dhui/dktest/releases) ![Supported Go versions](https://img.shields.io/badge/Go-1.12%2C%201.13-lightgrey.svg)
 
 `dktest` is short for **d**oc**k**er**test**.
 

@@ -16,7 +16,7 @@ services:
 env:
   global:
     - GO111MODULE=on
-    - GOLANGCI_LINT_VERSION=v1.12.5
+    - GOLANGCI_LINT_VERSION=v1.22.2
 
 cache:
   directories:

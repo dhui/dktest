@@ -119,9 +119,13 @@ $ docker container prune --filter label=dktest
   * [ ] Network config
 * [ ] Support testing against multiple containers. It can be faked for now by nested/recursive `Run()` calls but that serializes the containers' startup time.
 
-## Comparison to [dockertest](https://github.com/ory/dockertest)
+## Comparisons
 
-### Why `dktest` is better
+Last updated: 2020/01/03
+
+### [dockertest](https://github.com/ory/dockertest)
+
+#### Why `dktest` is better
 
 * Uses the [official Docker SDK](https://github.com/docker/docker)
   * [docker/docker](https://github.com/docker/docker) (aka [moby/moby](https://github.com/moby/moby)) uses [import path checking](https://golang.org/cmd/go/#hdr-Import_path_checking), so needs to be imported as `github.com/docker/docker`
@@ -131,8 +135,12 @@ $ docker container prune --filter label=dktest
 * Has better test coverage
 * Uses package management (Go modules) properly. e.g. not [manually vendored](https://github.com/ory/dockertest/pull/122)
 
-### Why `dockertest` is better
+#### Why `dockertest` is better
 
 * Has been around longer and API is more stable
 * More options for configuring Docker containers
 * Has more Github stars and contributors
+
+### [testcontainers-go](https://github.com/testcontainers/testcontainers-go)
+
+TBD

@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	testImage        = "alpine:3.8"
+	testImage        = "alpine"
 	testNetworkImage = "nginx:alpine"
 )
 
@@ -56,7 +56,7 @@ func TestRunParallel(t *testing.T) {
 	for i := 0; i < numTests; i++ {
 		t.Run("", func(t *testing.T) {
 			t.Parallel()
-			dktest.Run(t, "alpine:3.8", dktest.Options{}, noop)
+			dktest.Run(t, testImage, dktest.Options{}, noop)
 		})
 	}
 }

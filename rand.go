@@ -20,7 +20,7 @@ func randString(n uint) string {
 	}
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))]
+		b[i] = chars[rand.Intn(len(chars))] // nolint:gosec
 	}
 	return string(b)
 }

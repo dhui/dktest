@@ -168,6 +168,11 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 	if err != nil {
 		t.Fatal("Failed to get Docker client:", err)
 	}
+	defer func() {
+		if err := dc.Close(); err != nil {
+			t.Error("Failed to close Docker client:", err)
+		}
+	}()
 
 	opts.init()
 	pullCtx, pullTimeoutCancelFunc := context.WithTimeout(context.Background(), opts.PullTimeout)

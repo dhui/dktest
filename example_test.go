@@ -62,7 +62,7 @@ func Example_postgres() {
 	}
 
 	// dktest.Run() should be used within a test
-	dktest.Run(&testing.T{}, dockerImageName, dktest.Options{PortRequired: true, ReadyFunc: readyFunc},
+	dktest.Run(&testing.T{}, dockerImageName, dktest.Options{PortRequired: true, ReadyFunc: readyFunc, Env: map[string]string{"POSTGRES_HOST_AUTH_METHOD": "trust"}},
 		func(t *testing.T, c dktest.ContainerInfo) {
 			ip, port, err := c.FirstPort()
 			if err != nil {

@@ -4,7 +4,7 @@
 version: 2.1
 
 jobs:
-  "golang-1_14": &template
+  "golang-1_15": &template
     machine:
       # https://circleci.com/docs/2.0/configuration-reference/#available-machine-images
       image: ubuntu-2004:202010-01
@@ -18,7 +18,7 @@ jobs:
 
     environment:
       GO111MODULE: "on"
-      GO_VERSION: "1.14.x"
+      GO_VERSION: "1.15.x"
 
     steps:
       - run: curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
@@ -39,10 +39,10 @@ jobs:
       - run: go get github.com/mattn/goveralls
       - run: goveralls -service=circle-ci -coverprofile coverage.txt
 
-  "golang-1_15":
+  "golang-1_16":
     <<: *template
     environment:
-      GO_VERSION: "1.15.x"
+      GO_VERSION: "1.16.x"
 
 
 workflows:
@@ -50,4 +50,4 @@ workflows:
   build:
     jobs:
       - "golang-1_14"
-      - "golang-1_15"
+      - "golang-1_16"

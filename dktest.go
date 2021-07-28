@@ -70,7 +70,9 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 		PublishAllPorts: true,
 		PortBindings:    opts.PortBindings,
 		ShmSize:         opts.ShmSize,
-	}, &network.NetworkingConfig{}, c.Name)
+	}, &network.NetworkingConfig{},
+		nil,
+		c.Name)
 	if err != nil {
 		return c, err
 	}
@@ -164,7 +166,7 @@ func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
 
 // Run runs the given test function once the specified Docker image is running in a container
 func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, ContainerInfo)) {
-	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.39"))
+	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.41"))
 	if err != nil {
 		t.Fatal("Failed to get Docker client:", err)
 	}

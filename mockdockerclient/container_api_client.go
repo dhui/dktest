@@ -7,10 +7,13 @@ import (
 )
 
 import (
+	"github.com/docker/docker/client"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
+
+	"github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 // ContainerAPIClient is a mock implementation of the Docker's client.ContainerAPIClient interface
@@ -22,6 +25,8 @@ type ContainerAPIClient struct {
 	InspectResp *types.ContainerJSON
 	Logs        io.ReadCloser
 }
+
+var _ client.ContainerAPIClient = (*ContainerAPIClient)(nil)
 
 // ContainerAttach is a mock implementation of Docker's client.ContainerAPIClient.ContainerAttach()
 //
@@ -41,7 +46,7 @@ func (c *ContainerAPIClient) ContainerCommit(context.Context, string,
 
 // ContainerCreate is a mock implementation of Docker's client.ContainerAPIClient.ContainerCreate()
 func (c *ContainerAPIClient) ContainerCreate(context.Context, *container.Config, *container.HostConfig,
-	*network.NetworkingConfig, string) (container.ContainerCreateCreatedBody, error) {
+	*network.NetworkingConfig, *v1.Platform, string) (container.ContainerCreateCreatedBody, error) {
 	if c.CreateResp == nil {
 		return container.ContainerCreateCreatedBody{}, Err
 	}
@@ -188,6 +193,13 @@ func (c *ContainerAPIClient) ContainerStatPath(context.Context, string,
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerStats(context.Context, string,
 	bool) (types.ContainerStats, error) {
+	return types.ContainerStats{}, nil
+}
+
+// ContainerStatsOneShot is a mock implementation of Docker's client.ContainerAPIClient.ContainerStatsOneShot()
+//
+// TODO: properly implement
+func (c *ContainerAPIClient) ContainerStatsOneShot(context.Context, string) (types.ContainerStats, error) {
 	return types.ContainerStats{}, nil
 }
 

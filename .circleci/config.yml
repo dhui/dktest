@@ -7,7 +7,7 @@ jobs:
   "golang-1_15": &template
     machine:
       # https://circleci.com/docs/2.0/configuration-reference/#available-machine-images
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202107-01
 
     # https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium

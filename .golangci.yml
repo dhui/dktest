@@ -1,13 +1,11 @@
 linters:
   enable:
-    - golint
-    - interfacer
+    - revive
     - unconvert
     - dupl
     - goconst
     - gofmt
     - misspell
-    - maligned
     - unparam
     - nakedret
     - prealloc

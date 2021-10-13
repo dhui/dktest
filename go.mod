@@ -1,7 +1,7 @@
 module github.com/dhui/dktest
 
 require (
-	github.com/containerd/containerd v1.5.4 // indirect
+	github.com/containerd/containerd v1.5.7 // indirect
 	github.com/docker/docker v20.10.9+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/lib/pq v1.8.0

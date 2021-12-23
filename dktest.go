@@ -65,6 +65,7 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 		Entrypoint: opts.Entrypoint,
 		Cmd:        opts.Cmd,
 		Volumes:    opts.volumes(),
+		Hostname:   opts.Hostname,
 	}, &container.HostConfig{
 		PublishAllPorts: true,
 		PortBindings:    opts.PortBindings,

@@ -31,6 +31,7 @@ type Options struct {
 	ShmSize      int64
 	Volumes      []string
 	Mounts       []mount.Mount
+	Hostname     string
 }
 
 func (o *Options) init() {

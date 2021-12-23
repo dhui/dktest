@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
 )
 
@@ -29,6 +30,7 @@ type Options struct {
 	LogStderr    bool
 	ShmSize      int64
 	Volumes      []string
+	Mounts       []mount.Mount
 }
 
 func (o *Options) init() {

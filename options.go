@@ -3,9 +3,8 @@ package dktest
 import (
 	"context"
 	"time"
-)
 
-import (
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
 )
 
@@ -30,6 +29,9 @@ type Options struct {
 	LogStdout    bool
 	LogStderr    bool
 	ShmSize      int64
+	Volumes      []string
+	Mounts       []mount.Mount
+	Hostname     string
 }
 
 func (o *Options) init() {
@@ -45,6 +47,14 @@ func (o *Options) init() {
 	if o.CleanupTimeout <= 0 {
 		o.CleanupTimeout = DefaultCleanupTimeout
 	}
+}
+
+func (o *Options) volumes() map[string]struct{} {
+	volumes := make(map[string]struct{})
+	for _, v := range o.Volumes {
+		volumes[v] = struct{}{}
+	}
+	return volumes
 }
 
 func (o *Options) env() []string {

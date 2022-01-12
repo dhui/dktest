@@ -6,9 +6,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-)
 
-import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -66,10 +64,13 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 		Env:        opts.env(),
 		Entrypoint: opts.Entrypoint,
 		Cmd:        opts.Cmd,
+		Volumes:    opts.volumes(),
+		Hostname:   opts.Hostname,
 	}, &container.HostConfig{
 		PublishAllPorts: true,
 		PortBindings:    opts.PortBindings,
 		ShmSize:         opts.ShmSize,
+		Mounts:          opts.Mounts,
 	}, &network.NetworkingConfig{},
 		nil,
 		c.Name)

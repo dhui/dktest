@@ -115,7 +115,7 @@ $ docker container prune --filter label=dktest
 * [x] Support multiple ports in `ContainerInfo`
 * [ ] Use non-default network
 * [ ] Add more `Options`
-  * [ ] Volume mounts
+  * [x] Volume mounts
   * [ ] Network config
 * [ ] Support testing against multiple containers. It can be faked for now by nested/recursive `Run()` calls but that serializes the containers' startup time.
 

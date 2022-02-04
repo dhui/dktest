@@ -30,11 +30,11 @@ const (
 	label = "dktest"
 )
 
-func pullImage(ctx context.Context, lgr logger, dc client.ImageAPIClient, imgName string) error {
+func pullImage(ctx context.Context, lgr logger, dc client.ImageAPIClient, imgName, platform string) error {
 	lgr.Log("Pulling image:", imgName)
 	// lgr.Log(dc.ImageList(ctx, types.ImageListOptions{All: true}))
 
-	resp, err := dc.ImagePull(ctx, imgName, types.ImagePullOptions{})
+	resp, err := dc.ImagePull(ctx, imgName, types.ImagePullOptions{Platform: platform})
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 	pullCtx, pullTimeoutCancelFunc := context.WithTimeout(context.Background(), opts.PullTimeout)
 	defer pullTimeoutCancelFunc()
 
-	if err := pullImage(pullCtx, t, dc, imgName); err != nil {
+	if err := pullImage(pullCtx, t, dc, imgName, opts.Platform); err != nil {
 		t.Fatal("Failed to pull image:", imgName, "error:", err)
 	}
 

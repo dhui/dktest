@@ -32,6 +32,8 @@ type Options struct {
 	Volumes      []string
 	Mounts       []mount.Mount
 	Hostname     string
+	// Platform specifies the platform of the docker image that is pulled.
+	Platform string
 }
 
 func (o *Options) init() {

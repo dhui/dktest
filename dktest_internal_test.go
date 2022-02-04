@@ -44,10 +44,14 @@ func TestPullImage(t *testing.T) {
 	testCases := []struct {
 		name      string
 		client    mockdockerclient.ImageAPIClient
+		platform  string
 		expectErr bool
 	}{
 		{name: "success", client: mockdockerclient.ImageAPIClient{
 			PullResp: mockdockerclient.MockReadCloser{MockReader: successReader}}, expectErr: false},
+		{name: "with specific platform", client: mockdockerclient.ImageAPIClient{
+			PullResp: mockdockerclient.MockReadCloser{MockReader: successReader}, Platform: "linux/x86_64"},
+			platform: "linux/x86_64", expectErr: false},
 		{name: "pull error", client: mockdockerclient.ImageAPIClient{}, expectErr: true},
 		{name: "read error", client: mockdockerclient.ImageAPIClient{
 			PullResp: mockdockerclient.MockReadCloser{
@@ -63,7 +67,7 @@ func TestPullImage(t *testing.T) {
 	ctx := context.Background()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := pullImage(ctx, t, &tc.client, imageName)
+			err := pullImage(ctx, t, &tc.client, imageName, tc.platform)
 			testErr(t, err, tc.expectErr)
 		})
 	}

@@ -15,6 +15,7 @@ import (
 // ImageAPIClient is a mock implementation of the Docker's client.ImageAPIClient interface
 type ImageAPIClient struct {
 	PullResp io.ReadCloser
+	Platform string
 }
 
 // ImageBuild is a mock implementation of Docker's client.ImageAPIClient.ImageBuild()
@@ -83,8 +84,11 @@ func (c *ImageAPIClient) ImageLoad(context.Context, io.Reader, bool) (types.Imag
 }
 
 // ImagePull is a mock implementation of Docker's client.ImageAPIClient.ImagePull()
-func (c *ImageAPIClient) ImagePull(context.Context, string, types.ImagePullOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImagePull(ctx context.Context, ref string, opts types.ImagePullOptions) (io.ReadCloser, error) {
 	if c.PullResp == nil {
+		return nil, Err
+	}
+	if c.Platform != opts.Platform {
 		return nil, Err
 	}
 	return c.PullResp, nil

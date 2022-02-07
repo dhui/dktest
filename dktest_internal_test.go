@@ -5,16 +5,11 @@ import (
 	"io"
 	"testing"
 	"time"
-)
 
-import (
+	"github.com/dhui/dktest/mockdockerclient"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
-)
-
-import (
-	"github.com/dhui/dktest/mockdockerclient"
 )
 
 const (
@@ -50,7 +45,7 @@ func TestPullImage(t *testing.T) {
 		{name: "success", client: mockdockerclient.ImageAPIClient{
 			PullResp: mockdockerclient.MockReadCloser{MockReader: successReader}}, expectErr: false},
 		{name: "with specific platform", client: mockdockerclient.ImageAPIClient{
-			PullResp: mockdockerclient.MockReadCloser{MockReader: successReader}, Platform: "linux/x86_64"},
+			PullResp: mockdockerclient.MockReadCloser{MockReader: successReader}},
 			platform: "linux/x86_64", expectErr: false},
 		{name: "pull error", client: mockdockerclient.ImageAPIClient{}, expectErr: true},
 		{name: "read error", client: mockdockerclient.ImageAPIClient{

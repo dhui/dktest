@@ -6,14 +6,9 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
-)
 
-import (
-	"github.com/docker/go-connections/nat"
-)
-
-import (
 	"github.com/dhui/dktest"
+	"github.com/docker/go-connections/nat"
 )
 
 const (
@@ -49,6 +44,10 @@ func noop(*testing.T, dktest.ContainerInfo) {}
 
 func TestRun(t *testing.T) {
 	dktest.Run(t, testImage, dktest.Options{}, noop)
+}
+
+func TestRunTB(t *testing.T) {
+	dktest.RunT(t, testImage, dktest.Options{}, func(dktest.TestingT, dktest.ContainerInfo) {})
 }
 
 func TestRunParallel(t *testing.T) {

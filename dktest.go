@@ -26,6 +26,15 @@ var (
 	DefaultCleanupTimeout = 15 * time.Second
 )
 
+// TestingT is a subset of `*testing.T`/`testing.TB` that is used by dktest.
+// This minimal interface allows it to be used when a `*testing.T` is not available
+// such as benchmarks, or TestMain.
+type TestingT interface {
+	Error(args ...interface{})
+	Fatal(args ...interface{})
+	Log(args ...interface{})
+}
+
 const (
 	label = "dktest"
 )
@@ -167,6 +176,13 @@ func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
 
 // Run runs the given test function once the specified Docker image is running in a container
 func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, ContainerInfo)) {
+	RunT(t, imgName, opts, func(_ TestingT, containerInfo ContainerInfo) {
+		testFunc(t, containerInfo)
+	})
+}
+
+// RunT is the same as Run, but uses a testing.TB interface instead of testing.T.
+func RunT(t TestingT, imgName string, opts Options, testFunc func(TestingT, ContainerInfo)) {
 	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.41"))
 	if err != nil {
 		t.Fatal("Failed to get Docker client:", err)
@@ -205,4 +221,5 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 			t.Fatal("Container was never ready before timing out:", c.String())
 		}
 	}()
+
 }

@@ -197,7 +197,7 @@ func RunContext(ctx context.Context, logger Logger, imgName string, opts Options
 		return fmt.Errorf("pull image: %v error: %w", imgName, err)
 	}
 
-	{
+	return func() error {
 		runCtx, runTimeoutCancelFunc := context.WithTimeout(ctx, opts.Timeout)
 		defer runTimeoutCancelFunc()
 
@@ -216,9 +216,9 @@ func RunContext(ctx context.Context, logger Logger, imgName string, opts Options
 				return fmt.Errorf("run test func: %w", err)
 			}
 		} else {
-			retErr = fmt.Errorf("wait for container to get ready before timing out: %v", c.String())
+			return fmt.Errorf("wait for container to get ready before timing out: %v", c.String())
 		}
-	}
 
-	return retErr
+		return nil
+	}()
 }

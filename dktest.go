@@ -173,7 +173,7 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 		return nil
 	})
 	if err != nil {
-		t.Fatal("Failed to", err)
+		t.Fatal("Failed:", err)
 	}
 }
 
@@ -181,11 +181,11 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 func RunContext(ctx context.Context, logger Logger, imgName string, opts Options, testFunc func(ContainerInfo) error) (retErr error) {
 	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.41"))
 	if err != nil {
-		return fmt.Errorf("get Docker client: %w", err)
+		return fmt.Errorf("error getting Docker client: %w", err)
 	}
 	defer func() {
 		if err := dc.Close(); err != nil && retErr == nil {
-			retErr = fmt.Errorf("close Docker client: %w", err)
+			retErr = fmt.Errorf("error closing Docker client: %w", err)
 		}
 	}()
 
@@ -194,7 +194,7 @@ func RunContext(ctx context.Context, logger Logger, imgName string, opts Options
 	defer pullTimeoutCancelFunc()
 
 	if err := pullImage(pullCtx, logger, dc, imgName, opts.Platform); err != nil {
-		return fmt.Errorf("pull image: %v error: %w", imgName, err)
+		return fmt.Errorf("error pulling image: %v error: %w", imgName, err)
 	}
 
 	return func() error {
@@ -203,7 +203,7 @@ func RunContext(ctx context.Context, logger Logger, imgName string, opts Options
 
 		c, err := runImage(runCtx, logger, dc, imgName, opts)
 		if err != nil {
-			return fmt.Errorf("run image: %v error: %w", imgName, err)
+			return fmt.Errorf("error running image: %v error: %w", imgName, err)
 		}
 		defer func() {
 			stopCtx, stopTimeoutCancelFunc := context.WithTimeout(ctx, opts.CleanupTimeout)
@@ -213,10 +213,10 @@ func RunContext(ctx context.Context, logger Logger, imgName string, opts Options
 
 		if waitContainerReady(runCtx, logger, c, opts.ReadyFunc, opts.ReadyTimeout) {
 			if err := testFunc(c); err != nil {
-				return fmt.Errorf("run test func: %w", err)
+				return fmt.Errorf("error running test func: %w", err)
 			}
 		} else {
-			return fmt.Errorf("wait for container to get ready before timing out: %v", c.String())
+			return fmt.Errorf("timed out waiting for container to get ready: %v", c.String())
 		}
 
 		return nil

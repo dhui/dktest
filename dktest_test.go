@@ -2,18 +2,14 @@ package dktest_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
-)
 
-import (
-	"github.com/docker/go-connections/nat"
-)
-
-import (
 	"github.com/dhui/dktest"
+	"github.com/docker/go-connections/nat"
 )
 
 const (
@@ -49,6 +45,30 @@ func noop(*testing.T, dktest.ContainerInfo) {}
 
 func TestRun(t *testing.T) {
 	dktest.Run(t, testImage, dktest.Options{}, noop)
+}
+
+func TestRunContext(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		err := dktest.RunContext(context.Background(), t, testImage, dktest.Options{}, func(dktest.ContainerInfo) error {
+			return nil
+		})
+		if err != nil {
+			t.Fatal("failed", err)
+		}
+	})
+
+	t.Run("test func returns error", func(t *testing.T) {
+		var errForTest = errors.New("testFunc failed")
+		err := dktest.RunContext(context.Background(), t, testImage, dktest.Options{}, func(dktest.ContainerInfo) error {
+			return errForTest
+		})
+		if err == nil {
+			t.Fatal("expected error")
+		}
+		if errors.Unwrap(err) != errForTest {
+			t.Fatal("test func error not propagated with cause, got error:", err)
+		}
+	})
 }
 
 func TestRunParallel(t *testing.T) {

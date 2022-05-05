@@ -1,5 +1,6 @@
 package dktest
 
-type logger interface {
+// Logger is the interface used to log messages.
+type Logger interface {
 	Log(...interface{})
 }

@@ -2,6 +2,7 @@ package dktest
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -30,7 +31,7 @@ const (
 	label = "dktest"
 )
 
-func pullImage(ctx context.Context, lgr logger, dc client.ImageAPIClient, imgName, platform string) error {
+func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgName, platform string) error {
 	lgr.Log("Pulling image:", imgName)
 	// lgr.Log(dc.ImageList(ctx, types.ImageListOptions{All: true}))
 
@@ -55,7 +56,7 @@ func pullImage(ctx context.Context, lgr logger, dc client.ImageAPIClient, imgNam
 	return nil
 }
 
-func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, imgName string,
+func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, imgName string,
 	opts Options) (ContainerInfo, error) {
 	c := ContainerInfo{Name: genContainerName(), ImageName: imgName}
 	createResp, err := dc.ContainerCreate(ctx, &container.Config{
@@ -103,7 +104,7 @@ func runImage(ctx context.Context, lgr logger, dc client.ContainerAPIClient, img
 	return c, nil
 }
 
-func stopContainer(ctx context.Context, lgr logger, dc client.ContainerAPIClient, c ContainerInfo,
+func stopContainer(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, c ContainerInfo,
 	logStdout, logStderr bool) {
 	if logStdout || logStderr {
 		if logs, err := dc.ContainerLogs(ctx, c.ID, types.ContainerLogsOptions{
@@ -137,7 +138,7 @@ func stopContainer(ctx context.Context, lgr logger, dc client.ContainerAPIClient
 	lgr.Log("Removed container:", c.String())
 }
 
-func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
+func waitContainerReady(ctx context.Context, lgr Logger, c ContainerInfo,
 	readyFunc func(context.Context, ContainerInfo) bool, readyTimeout time.Duration) bool {
 	if readyFunc == nil {
 		return true
@@ -167,42 +168,57 @@ func waitContainerReady(ctx context.Context, lgr logger, c ContainerInfo,
 
 // Run runs the given test function once the specified Docker image is running in a container
 func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, ContainerInfo)) {
+	err := RunContext(context.Background(), t, imgName, opts, func(containerInfo ContainerInfo) error {
+		testFunc(t, containerInfo)
+		return nil
+	})
+	if err != nil {
+		t.Fatal("Failed:", err)
+	}
+}
+
+// RunContext is similar to Run, but takes a parent context and returns an error and doesn't rely on a testing.T.
+func RunContext(ctx context.Context, logger Logger, imgName string, opts Options, testFunc func(ContainerInfo) error) (retErr error) {
 	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.41"))
 	if err != nil {
-		t.Fatal("Failed to get Docker client:", err)
+		return fmt.Errorf("error getting Docker client: %w", err)
 	}
 	defer func() {
-		if err := dc.Close(); err != nil {
-			t.Error("Failed to close Docker client:", err)
+		if err := dc.Close(); err != nil && retErr == nil {
+			retErr = fmt.Errorf("error closing Docker client: %w", err)
 		}
 	}()
 
 	opts.init()
-	pullCtx, pullTimeoutCancelFunc := context.WithTimeout(context.Background(), opts.PullTimeout)
+	pullCtx, pullTimeoutCancelFunc := context.WithTimeout(ctx, opts.PullTimeout)
 	defer pullTimeoutCancelFunc()
 
-	if err := pullImage(pullCtx, t, dc, imgName, opts.Platform); err != nil {
-		t.Fatal("Failed to pull image:", imgName, "error:", err)
+	if err := pullImage(pullCtx, logger, dc, imgName, opts.Platform); err != nil {
+		return fmt.Errorf("error pulling image: %v error: %w", imgName, err)
 	}
 
-	func() {
-		runCtx, runTimeoutCancelFunc := context.WithTimeout(context.Background(), opts.Timeout)
+	return func() error {
+		runCtx, runTimeoutCancelFunc := context.WithTimeout(ctx, opts.Timeout)
 		defer runTimeoutCancelFunc()
 
-		c, err := runImage(runCtx, t, dc, imgName, opts)
+		c, err := runImage(runCtx, logger, dc, imgName, opts)
 		if err != nil {
-			t.Fatal("Failed to run image:", imgName, "error:", err)
+			return fmt.Errorf("error running image: %v error: %w", imgName, err)
 		}
 		defer func() {
-			stopCtx, stopTimeoutCancelFunc := context.WithTimeout(context.Background(), opts.CleanupTimeout)
+			stopCtx, stopTimeoutCancelFunc := context.WithTimeout(ctx, opts.CleanupTimeout)
 			defer stopTimeoutCancelFunc()
-			stopContainer(stopCtx, t, dc, c, opts.LogStdout, opts.LogStderr)
+			stopContainer(stopCtx, logger, dc, c, opts.LogStdout, opts.LogStderr)
 		}()
 
-		if waitContainerReady(runCtx, t, c, opts.ReadyFunc, opts.ReadyTimeout) {
-			testFunc(t, c)
+		if waitContainerReady(runCtx, logger, c, opts.ReadyFunc, opts.ReadyTimeout) {
+			if err := testFunc(c); err != nil {
+				return fmt.Errorf("error running test func: %w", err)
+			}
 		} else {
-			t.Fatal("Container was never ready before timing out:", c.String())
+			return fmt.Errorf("timed out waiting for container to get ready: %v", c.String())
 		}
+
+		return nil
 	}()
 }

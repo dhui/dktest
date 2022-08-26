@@ -23,7 +23,7 @@ jobs:
     steps:
       - run: curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
       - run: curl -sfL -o ~/bin/install-golangci-lint.sh https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
-      - run: chmod +x ~/bin/gimme ~/bin/golangci-lint.sh
+      - run: chmod +x ~/bin/gimme ~/bin/install-golangci-lint.sh
       - run: eval "$(gimme $GO_VERSION)"
       - run: install-golangci-lint.sh -b ~/bin v1.41.1
       - checkout

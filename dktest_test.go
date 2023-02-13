@@ -95,7 +95,7 @@ func TestRunWithNetworkPortBinding(t *testing.T) {
 		PortBindings: nat.PortMap{port: []nat.PortBinding{{HostPort: "8181"}}}}, noop)
 }
 
-func TestRunWithNetworkExposePort(t *testing.T) {
+func TestRunWithExposesPorts(t *testing.T) {
 	port, err := nat.NewPort("tcp", "80")
 	if err != nil {
 		t.Fatal("Invalid port:", err)

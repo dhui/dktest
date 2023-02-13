@@ -94,3 +94,13 @@ func TestRunWithNetworkPortBinding(t *testing.T) {
 	dktest.Run(t, testNetworkImage, dktest.Options{ReadyFunc: nginxReady, PortRequired: true,
 		PortBindings: nat.PortMap{port: []nat.PortBinding{{HostPort: "8181"}}}}, noop)
 }
+
+func TestRunWithNetworkExposePort(t *testing.T) {
+	port, err := nat.NewPort("tcp", "80")
+	if err != nil {
+		t.Fatal("Invalid port:", err)
+	}
+	dktest.Run(t, testNetworkImage, dktest.Options{ReadyFunc: nginxReady, PortRequired: true,
+		ExposedPorts: nat.PortSet{port: struct{}{}},
+	}, noop)
+}

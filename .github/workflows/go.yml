@@ -32,7 +32,17 @@ jobs:
     - name: Test
       run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
       
-    - name: Coveralls
-      uses: coverallsapp/github-action@v1
+    - name: Send coverage to Coveralls
+      uses: shogo82148/actions-goveralls@v1
       with:
-        path-to-lcov: ./coverage.txt
+        path-to-profile: coverage.txt
+        flag-name: Go-${{ matrix.go }}
+        parallel: true
+
+  check-coverage:
+    name: Check coverage
+    needs: [build]
+    steps:
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          parallel-finished: true

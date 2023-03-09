@@ -32,8 +32,7 @@ jobs:
     - name: Test
       run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
       
-    - name: Codecov
-      uses: codecov/codecov-action@v2
+    - name: Coveralls
+      uses: coverallsapp/github-action@v1
       with:
-        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-        files: ./coverage.txt
+        path-to-lcov: ./coverage.txt

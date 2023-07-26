@@ -56,6 +56,14 @@ func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgNam
 	return nil
 }
 
+func removeImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgName string) {
+	lgr.Log("Removing image:", imgName)
+
+	if _, err := dc.ImageRemove(ctx, imgName, types.ImageRemoveOptions{Force: true, PruneChildren: true}); err != nil {
+		lgr.Log("Failed to remove image: ", err.Error())
+	}
+}
+
 func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, imgName string,
 	opts Options) (ContainerInfo, error) {
 	c := ContainerInfo{Name: genContainerName(), ImageName: imgName}
@@ -209,6 +217,7 @@ func RunContext(ctx context.Context, logger Logger, imgName string, opts Options
 			stopCtx, stopTimeoutCancelFunc := context.WithTimeout(ctx, opts.CleanupTimeout)
 			defer stopTimeoutCancelFunc()
 			stopContainer(stopCtx, logger, dc, c, opts.LogStdout, opts.LogStderr)
+			removeImage(ctx, logger, dc, imgName)
 		}()
 
 		if waitContainerReady(runCtx, logger, c, opts.ReadyFunc, opts.ReadyTimeout) {

@@ -60,13 +60,14 @@ func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, img
 	opts Options) (ContainerInfo, error) {
 	c := ContainerInfo{Name: genContainerName(), ImageName: imgName}
 	createResp, err := dc.ContainerCreate(ctx, &container.Config{
-		Image:      imgName,
-		Labels:     map[string]string{label: "true"},
-		Env:        opts.env(),
-		Entrypoint: opts.Entrypoint,
-		Cmd:        opts.Cmd,
-		Volumes:    opts.volumes(),
-		Hostname:   opts.Hostname,
+		Image:        imgName,
+		Labels:       map[string]string{label: "true"},
+		Env:          opts.env(),
+		Entrypoint:   opts.Entrypoint,
+		Cmd:          opts.Cmd,
+		Volumes:      opts.volumes(),
+		ExposedPorts: opts.ExposedPorts,
+		Hostname:     opts.Hostname,
 	}, &container.HostConfig{
 		PublishAllPorts: true,
 		PortBindings:    opts.PortBindings,
@@ -126,7 +127,7 @@ func stopContainer(ctx context.Context, lgr Logger, dc client.ContainerAPIClient
 		}
 	}
 
-	if err := dc.ContainerStop(ctx, c.ID, nil); err != nil {
+	if err := dc.ContainerStop(ctx, c.ID, container.StopOptions{}); err != nil {
 		lgr.Log("Error stopping container:", c.String(), "error:", err)
 	}
 	lgr.Log("Stopped container:", c.String())
@@ -179,7 +180,7 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 
 // RunContext is similar to Run, but takes a parent context and returns an error and doesn't rely on a testing.T.
 func RunContext(ctx context.Context, logger Logger, imgName string, opts Options, testFunc func(ContainerInfo) error) (retErr error) {
-	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.41"))
+	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("error getting Docker client: %w", err)
 	}

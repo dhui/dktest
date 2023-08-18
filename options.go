@@ -23,6 +23,8 @@ type Options struct {
 	Env            map[string]string
 	Entrypoint     []string
 	Cmd            []string
+	// List of exposed ports
+	ExposedPorts nat.PortSet
 	// If you prefer to specify your port bindings as a string, use nat.ParsePortSpecs()
 	PortBindings nat.PortMap
 	PortRequired bool

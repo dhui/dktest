@@ -126,7 +126,7 @@ func stopContainer(ctx context.Context, lgr Logger, dc client.ContainerAPIClient
 		}
 	}
 
-	if err := dc.ContainerStop(ctx, c.ID, nil); err != nil {
+	if err := dc.ContainerStop(ctx, c.ID, container.StopOptions{}); err != nil {
 		lgr.Log("Error stopping container:", c.String(), "error:", err)
 	}
 	lgr.Log("Stopped container:", c.String())

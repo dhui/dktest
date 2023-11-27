@@ -81,7 +81,7 @@ func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, img
 	c.ID = createResp.ID
 	lgr.Log("Created container:", c.String())
 
-	if err := dc.ContainerStart(ctx, createResp.ID,types.ContainerStartOptions{}); err != nil {
+	if err := dc.ContainerStart(ctx, createResp.ID, types.ContainerStartOptions{}); err != nil {
 		return c, err
 	}
 	lgr.Log("Started container:", c.String())

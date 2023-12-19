@@ -7,7 +7,7 @@ type MockReader struct {
 }
 
 // Read is a mock implementation of io.Reader.Read()
-func (r MockReader) Read(p []byte) (n int, err error) {
+func (r MockReader) Read(_ []byte) (n int, err error) {
 	return r.N, r.Err
 }
 

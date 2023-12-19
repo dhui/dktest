@@ -56,7 +56,7 @@ func (c *ContainerAPIClient) ContainerCreate(context.Context, *container.Config,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerDiff(context.Context,
-	string) ([]container.ContainerChangeResponseItem, error) {
+	string) ([]container.FilesystemChange, error) {
 	return nil, nil
 }
 

@@ -62,7 +62,8 @@ func TestPullImage(t *testing.T) {
 	ctx := context.Background()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := pullImage(ctx, t, &tc.client, imageName, tc.platform)
+			client := tc.client
+			err := pullImage(ctx, t, &client, imageName, tc.platform)
 			testErr(t, err, tc.expectErr)
 		})
 	}
@@ -82,7 +83,7 @@ func TestRunImage(t *testing.T) {
 		t.Fatal("Error parsing port bindings:", err)
 	}
 
-	successCreateResp := &container.ContainerCreateCreatedBody{}
+	successCreateResp := &container.CreateResponse{}
 	successInspectResp := &types.ContainerJSON{}
 	successInspectRespWithPortBindingNoIP := &types.ContainerJSON{NetworkSettings: &types.NetworkSettings{
 		NetworkSettingsBase: types.NetworkSettingsBase{Ports: portBindingsNoIP},
@@ -123,7 +124,8 @@ func TestRunImage(t *testing.T) {
 	ctx := context.Background()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := runImage(ctx, t, &tc.client, imageName, tc.opts)
+			client := tc.client
+			_, err := runImage(ctx, t, &client, imageName, tc.opts)
 			testErr(t, err, tc.expectErr)
 		})
 	}
@@ -157,7 +159,8 @@ func TestStopContainer(t *testing.T) {
 	ctx := context.Background()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			stopContainer(ctx, t, &tc.client, containerInfo, tc.log, tc.log)
+			client := tc.client
+			stopContainer(ctx, t, &client, containerInfo, tc.log, tc.log)
 		})
 	}
 }

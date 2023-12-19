@@ -3,7 +3,6 @@ package mockdockerclient
 import (
 	"context"
 	"io"
-	"time"
 )
 
 import (
@@ -18,7 +17,7 @@ import (
 
 // ContainerAPIClient is a mock implementation of the Docker's client.ContainerAPIClient interface
 type ContainerAPIClient struct {
-	CreateResp  *container.ContainerCreateCreatedBody
+	CreateResp  *container.CreateResponse
 	StartErr    error
 	StopErr     error
 	RemoveErr   error
@@ -46,9 +45,9 @@ func (c *ContainerAPIClient) ContainerCommit(context.Context, string,
 
 // ContainerCreate is a mock implementation of Docker's client.ContainerAPIClient.ContainerCreate()
 func (c *ContainerAPIClient) ContainerCreate(context.Context, *container.Config, *container.HostConfig,
-	*network.NetworkingConfig, *v1.Platform, string) (container.ContainerCreateCreatedBody, error) {
+	*network.NetworkingConfig, *v1.Platform, string) (container.CreateResponse, error) {
 	if c.CreateResp == nil {
-		return container.ContainerCreateCreatedBody{}, Err
+		return container.CreateResponse{}, Err
 	}
 	return *c.CreateResp, nil
 }
@@ -176,7 +175,7 @@ func (c *ContainerAPIClient) ContainerResize(context.Context, string, types.Resi
 // ContainerRestart is a mock implementation of Docker's client.ContainerAPIClient.ContainerRestart()
 //
 // TODO: properly implement
-func (c *ContainerAPIClient) ContainerRestart(context.Context, string, *time.Duration) error {
+func (c *ContainerAPIClient) ContainerRestart(context.Context, string, container.StopOptions) error {
 	return nil
 }
 
@@ -210,7 +209,7 @@ func (c *ContainerAPIClient) ContainerStart(context.Context, string,
 }
 
 // ContainerStop is a mock implementation of Docker's client.ContainerAPIClient.ContainerStop()
-func (c *ContainerAPIClient) ContainerStop(context.Context, string, *time.Duration) error {
+func (c *ContainerAPIClient) ContainerStop(context.Context, string, container.StopOptions) error {
 	return c.StopErr
 }
 
@@ -241,7 +240,7 @@ func (c *ContainerAPIClient) ContainerUpdate(context.Context, string,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerWait(context.Context, string,
-	container.WaitCondition) (<-chan container.ContainerWaitOKBody, <-chan error) {
+	container.WaitCondition) (<-chan container.WaitResponse, <-chan error) {
 	return nil, nil
 }
 

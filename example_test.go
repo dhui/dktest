@@ -38,7 +38,7 @@ func Example_nginx() {
 
 	// dktest.Run() should be used within a test
 	dktest.Run(&testing.T{}, dockerImageName, dktest.Options{PortRequired: true, ReadyFunc: readyFunc},
-		func(t *testing.T, c dktest.ContainerInfo) {
+		func(t *testing.T, c dktest.ContainerInfo) { // nolint:revive
 			// test code here
 		})
 

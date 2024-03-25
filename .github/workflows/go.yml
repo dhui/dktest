@@ -9,13 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
-        go: [ '1.20', '1.21' ]
-        
+        go: [ '1.21', '1.22' ]
+
     name: Go ${{ matrix.go }}
-    
+
     steps:
     - uses: actions/checkout@v4
 
@@ -23,15 +23,15 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go }}
-        
+
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
-        version: v1.55.2
+        version: v1.57.1
 
     - name: Test
       run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
-      
+
     - name: Send coverage to Coveralls
       uses: shogo82148/actions-goveralls@v1
       with:

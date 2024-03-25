@@ -7,7 +7,20 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: 1.57.1
+
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,11 +36,6 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go }}
-
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
-      with:
-        version: v1.57.1
 
     - name: Test
       run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...

@@ -19,10 +19,13 @@ type Options struct {
 	ReadyTimeout time.Duration
 	// CleanupTimeout is the timeout used when stopping and removing a container
 	CleanupTimeout time.Duration
-	ReadyFunc      func(context.Context, ContainerInfo) bool
-	Env            map[string]string
-	Entrypoint     []string
-	Cmd            []string
+	// CleanupImage specifies whether or not the image should be removed after the test run.
+	// If the image is used by multiple tests, you'll want to cleanup the image yourself.
+	CleanupImage bool
+	ReadyFunc    func(context.Context, ContainerInfo) bool
+	Env          map[string]string
+	Entrypoint   []string
+	Cmd          []string
 	// If you prefer to specify your port bindings as a string, use nat.ParsePortSpecs()
 	PortBindings nat.PortMap
 	PortRequired bool

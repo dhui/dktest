@@ -217,7 +217,9 @@ func RunContext(ctx context.Context, logger Logger, imgName string, opts Options
 			stopCtx, stopTimeoutCancelFunc := context.WithTimeout(ctx, opts.CleanupTimeout)
 			defer stopTimeoutCancelFunc()
 			stopContainer(stopCtx, logger, dc, c, opts.LogStdout, opts.LogStderr)
-			removeImage(ctx, logger, dc, imgName)
+			if opts.CleanupImage {
+				removeImage(stopCtx, logger, dc, imgName)
+			}
 		}()
 
 		if waitContainerReady(runCtx, logger, c, opts.ReadyFunc, opts.ReadyTimeout) {

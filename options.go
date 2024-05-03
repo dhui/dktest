@@ -28,6 +28,7 @@ type Options struct {
 	Cmd          []string
 	// If you prefer to specify your port bindings as a string, use nat.ParsePortSpecs()
 	PortBindings nat.PortMap
+	ExposedPorts nat.PortSet
 	PortRequired bool
 	LogStdout    bool
 	LogStderr    bool

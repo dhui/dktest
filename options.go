@@ -36,7 +36,8 @@ type Options struct {
 	Mounts       []mount.Mount
 	Hostname     string
 	// Platform specifies the platform of the docker image that is pulled.
-	Platform string
+	Platform     string
+	ExposedPorts nat.PortSet
 }
 
 func (o *Options) init() {

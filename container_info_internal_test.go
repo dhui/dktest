@@ -3,9 +3,7 @@ package dktest
 import (
 	"strconv"
 	"testing"
-)
 
-import (
 	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/assert"
 )

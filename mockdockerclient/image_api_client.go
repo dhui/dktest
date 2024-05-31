@@ -3,9 +3,7 @@ package mockdockerclient
 import (
 	"context"
 	"io"
-)
 
-import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
@@ -71,7 +69,7 @@ func (c *ImageAPIClient) ImageInspectWithRaw(context.Context, string) (types.Ima
 // ImageList is a mock implementation of Docker's client.ImageAPIClient.ImageList()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageList(context.Context, types.ImageListOptions) ([]types.ImageSummary, error) {
+func (c *ImageAPIClient) ImageList(context.Context, image.ListOptions) ([]image.Summary, error) {
 	return nil, nil
 }
 
@@ -101,7 +99,7 @@ func (c *ImageAPIClient) ImagePush(context.Context, string, types.ImagePushOptio
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageRemove(context.Context, string,
-	types.ImageRemoveOptions) ([]types.ImageDeleteResponseItem, error) {
+	image.RemoveOptions) ([]image.DeleteResponse, error) {
 	return nil, nil
 }
 

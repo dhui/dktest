@@ -89,7 +89,7 @@ func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, img
 	c.ID = createResp.ID
 	lgr.Log("Created container:", c.String())
 
-	if err := dc.ContainerStart(ctx, createResp.ID, types.ContainerStartOptions{}); err != nil {
+	if err := dc.ContainerStart(ctx, createResp.ID, container.StartOptions{}); err != nil {
 		return c, err
 	}
 	lgr.Log("Started container:", c.String())
@@ -115,7 +115,7 @@ func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, img
 func stopContainer(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, c ContainerInfo,
 	logStdout, logStderr bool) {
 	if logStdout || logStderr {
-		if logs, err := dc.ContainerLogs(ctx, c.ID, types.ContainerLogsOptions{
+		if logs, err := dc.ContainerLogs(ctx, c.ID, container.LogsOptions{
 			Timestamps: true, ShowStdout: logStdout, ShowStderr: logStderr,
 		}); err == nil {
 			b, err := ioutil.ReadAll(logs)
@@ -140,7 +140,7 @@ func stopContainer(ctx context.Context, lgr Logger, dc client.ContainerAPIClient
 	lgr.Log("Stopped container:", c.String())
 
 	if err := dc.ContainerRemove(ctx, c.ID,
-		types.ContainerRemoveOptions{RemoveVolumes: true, Force: true}); err != nil {
+		container.RemoveOptions{RemoveVolumes: true, Force: true}); err != nil {
 		lgr.Log("Error removing container:", c.String(), "error:", err)
 	}
 	lgr.Log("Removed container:", c.String())

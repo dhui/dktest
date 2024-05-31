@@ -11,6 +11,7 @@ const (
 )
 
 func init() {
+	// nolint:gosec
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
@@ -20,7 +21,8 @@ func randString(n uint) string {
 	}
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))] // nolint:gosec
+		// nolint:gosec
+		b[i] = chars[rand.Intn(len(chars))]
 	}
 	return string(b)
 }

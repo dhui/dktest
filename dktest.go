@@ -3,13 +3,13 @@ package dktest
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
@@ -35,7 +35,7 @@ func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgNam
 	lgr.Log("Pulling image:", imgName)
 	// lgr.Log(dc.ImageList(ctx, types.ImageListOptions{All: true}))
 
-	resp, err := dc.ImagePull(ctx, imgName, types.ImagePullOptions{Platform: platform})
+	resp, err := dc.ImagePull(ctx, imgName, image.PullOptions{Platform: platform})
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgNam
 func removeImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgName string) {
 	lgr.Log("Removing image:", imgName)
 
-	if _, err := dc.ImageRemove(ctx, imgName, types.ImageRemoveOptions{Force: true, PruneChildren: true}); err != nil {
+	if _, err := dc.ImageRemove(ctx, imgName, image.RemoveOptions{Force: true, PruneChildren: true}); err != nil {
 		lgr.Log("Failed to remove image: ", err.Error())
 	}
 }
@@ -118,7 +118,7 @@ func stopContainer(ctx context.Context, lgr Logger, dc client.ContainerAPIClient
 		if logs, err := dc.ContainerLogs(ctx, c.ID, container.LogsOptions{
 			Timestamps: true, ShowStdout: logStdout, ShowStderr: logStderr,
 		}); err == nil {
-			b, err := ioutil.ReadAll(logs)
+			b, err := io.ReadAll(logs)
 			defer func() {
 				if err := logs.Close(); err != nil {
 					lgr.Log("Error closing logs:", err)

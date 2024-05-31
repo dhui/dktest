@@ -40,7 +40,7 @@ func (c *ImageAPIClient) BuildCancel(context.Context, string) error { return nil
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageCreate(context.Context, string,
-	types.ImageCreateOptions) (io.ReadCloser, error) {
+	image.CreateOptions) (io.ReadCloser, error) {
 	return nil, nil
 }
 
@@ -55,7 +55,7 @@ func (c *ImageAPIClient) ImageHistory(context.Context, string) ([]image.HistoryR
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageImport(context.Context, types.ImageImportSource, string,
-	types.ImageImportOptions) (io.ReadCloser, error) {
+	image.ImportOptions) (io.ReadCloser, error) {
 	return nil, nil
 }
 
@@ -81,7 +81,7 @@ func (c *ImageAPIClient) ImageLoad(context.Context, io.Reader, bool) (types.Imag
 }
 
 // ImagePull is a mock implementation of Docker's client.ImageAPIClient.ImagePull()
-func (c *ImageAPIClient) ImagePull(context.Context, string, types.ImagePullOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImagePull(context.Context, string, image.PullOptions) (io.ReadCloser, error) {
 	if c.PullResp == nil {
 		return nil, Err
 	}
@@ -91,7 +91,7 @@ func (c *ImageAPIClient) ImagePull(context.Context, string, types.ImagePullOptio
 // ImagePush is a mock implementation of Docker's client.ImageAPIClient.ImagePush()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImagePush(context.Context, string, types.ImagePushOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImagePush(context.Context, string, image.PushOptions) (io.ReadCloser, error) {
 	return nil, nil
 }
 

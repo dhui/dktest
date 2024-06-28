@@ -44,20 +44,6 @@ jobs:
     environment:
       GO_VERSION: "1.19.x"
 
-  "golang-1_20":
-    <<: *template
-    environment:
-      GO_VERSION: "1.20.x"
-
-  "golang-1_21":
-    <<: *template
-    environment:
-      GO_VERSION: "1.21.x"
-
-  "golang-1_22":
-    <<: *template
-    environment:
-      GO_VERSION: "1.22.x"
 
 workflows:
   version: 2
@@ -65,6 +51,3 @@ workflows:
     jobs:
       - "golang-1_18"
       - "golang-1_19"
-      - "golang-1_20"
-      - "golang-1_21"
-      - "golang-1_22"

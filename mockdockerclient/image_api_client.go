@@ -54,7 +54,7 @@ func (c *ImageAPIClient) ImageHistory(context.Context, string) ([]image.HistoryR
 // ImageImport is a mock implementation of Docker's client.ImageAPIClient.ImageImport()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageImport(context.Context, types.ImageImportSource, string,
+func (c *ImageAPIClient) ImageImport(context.Context, image.ImportSource, string,
 	image.ImportOptions) (io.ReadCloser, error) {
 	return nil, nil
 }

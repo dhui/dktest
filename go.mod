@@ -1,7 +1,7 @@
 module github.com/dhui/dktest
 
 require (
-	github.com/docker/docker v26.1.3+incompatible
+	github.com/docker/docker v27.0.2+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/lib/pq v1.8.0
 	github.com/opencontainers/image-spec v1.0.2

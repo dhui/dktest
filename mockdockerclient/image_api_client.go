@@ -3,9 +3,7 @@ package mockdockerclient
 import (
 	"context"
 	"io"
-)
 
-import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
@@ -42,7 +40,7 @@ func (c *ImageAPIClient) BuildCancel(context.Context, string) error { return nil
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageCreate(context.Context, string,
-	types.ImageCreateOptions) (io.ReadCloser, error) {
+	image.CreateOptions) (io.ReadCloser, error) {
 	return nil, nil
 }
 
@@ -56,8 +54,8 @@ func (c *ImageAPIClient) ImageHistory(context.Context, string) ([]image.HistoryR
 // ImageImport is a mock implementation of Docker's client.ImageAPIClient.ImageImport()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageImport(context.Context, types.ImageImportSource, string,
-	types.ImageImportOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImageImport(context.Context, image.ImportSource, string,
+	image.ImportOptions) (io.ReadCloser, error) {
 	return nil, nil
 }
 
@@ -71,19 +69,19 @@ func (c *ImageAPIClient) ImageInspectWithRaw(context.Context, string) (types.Ima
 // ImageList is a mock implementation of Docker's client.ImageAPIClient.ImageList()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageList(context.Context, types.ImageListOptions) ([]types.ImageSummary, error) {
+func (c *ImageAPIClient) ImageList(context.Context, image.ListOptions) ([]image.Summary, error) {
 	return nil, nil
 }
 
 // ImageLoad is a mock implementation of Docker's client.ImageAPIClient.ImageLoad()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageLoad(context.Context, io.Reader, bool) (types.ImageLoadResponse, error) {
-	return types.ImageLoadResponse{}, nil
+func (c *ImageAPIClient) ImageLoad(context.Context, io.Reader, bool) (image.LoadResponse, error) {
+	return image.LoadResponse{}, nil
 }
 
 // ImagePull is a mock implementation of Docker's client.ImageAPIClient.ImagePull()
-func (c *ImageAPIClient) ImagePull(context.Context, string, types.ImagePullOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImagePull(context.Context, string, image.PullOptions) (io.ReadCloser, error) {
 	if c.PullResp == nil {
 		return nil, Err
 	}
@@ -93,7 +91,7 @@ func (c *ImageAPIClient) ImagePull(context.Context, string, types.ImagePullOptio
 // ImagePush is a mock implementation of Docker's client.ImageAPIClient.ImagePush()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImagePush(context.Context, string, types.ImagePushOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImagePush(context.Context, string, image.PushOptions) (io.ReadCloser, error) {
 	return nil, nil
 }
 
@@ -101,7 +99,7 @@ func (c *ImageAPIClient) ImagePush(context.Context, string, types.ImagePushOptio
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageRemove(context.Context, string,
-	types.ImageRemoveOptions) ([]types.ImageDeleteResponseItem, error) {
+	image.RemoveOptions) ([]image.DeleteResponse, error) {
 	return nil, nil
 }
 
@@ -109,7 +107,7 @@ func (c *ImageAPIClient) ImageRemove(context.Context, string,
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageSearch(context.Context, string,
-	types.ImageSearchOptions) ([]registry.SearchResult, error) {
+	registry.SearchOptions) ([]registry.SearchResult, error) {
 	return nil, nil
 }
 
@@ -128,6 +126,6 @@ func (c *ImageAPIClient) ImageTag(context.Context, string, string) error { retur
 // ImagesPrune is a mock implementation of Docker's client.ImageAPIClient.ImagesPrune()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImagesPrune(context.Context, filters.Args) (types.ImagesPruneReport, error) {
-	return types.ImagesPruneReport{}, nil
+func (c *ImageAPIClient) ImagesPrune(context.Context, filters.Args) (image.PruneReport, error) {
+	return image.PruneReport{}, nil
 }

@@ -62,7 +62,7 @@ func (c *ContainerAPIClient) ContainerDiff(context.Context,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerExecAttach(context.Context, string,
-	types.ExecStartCheck) (types.HijackedResponse, error) {
+	container.ExecStartOptions) (types.HijackedResponse, error) {
 	return types.HijackedResponse{}, nil
 }
 
@@ -70,7 +70,7 @@ func (c *ContainerAPIClient) ContainerExecAttach(context.Context, string,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerExecCreate(context.Context, string,
-	types.ExecConfig) (types.IDResponse, error) {
+	container.ExecOptions) (types.IDResponse, error) {
 	return types.IDResponse{}, nil
 }
 
@@ -78,8 +78,8 @@ func (c *ContainerAPIClient) ContainerExecCreate(context.Context, string,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerExecInspect(context.Context,
-	string) (types.ContainerExecInspect, error) {
-	return types.ContainerExecInspect{}, nil
+	string) (container.ExecInspect, error) {
+	return container.ExecInspect{}, nil
 }
 
 // ContainerExecResize is a mock implementation of Docker's client.ContainerAPIClient.ContainerExecResize()
@@ -94,7 +94,7 @@ func (c *ContainerAPIClient) ContainerExecResize(context.Context, string,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerExecStart(context.Context, string,
-	types.ExecStartCheck) error {
+	container.ExecStartOptions) error {
 	return nil
 }
 
@@ -181,23 +181,23 @@ func (c *ContainerAPIClient) ContainerRestart(context.Context, string, container
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerStatPath(context.Context, string,
-	string) (types.ContainerPathStat, error) {
-	return types.ContainerPathStat{}, nil
+	string) (container.PathStat, error) {
+	return container.PathStat{}, nil
 }
 
 // ContainerStats is a mock implementation of Docker's client.ContainerAPIClient.ContainerStats()
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerStats(context.Context, string,
-	bool) (types.ContainerStats, error) {
-	return types.ContainerStats{}, nil
+	bool) (container.StatsResponseReader, error) {
+	return container.StatsResponseReader{}, nil
 }
 
 // ContainerStatsOneShot is a mock implementation of Docker's client.ContainerAPIClient.ContainerStatsOneShot()
 //
 // TODO: properly implement
-func (c *ContainerAPIClient) ContainerStatsOneShot(context.Context, string) (types.ContainerStats, error) {
-	return types.ContainerStats{}, nil
+func (c *ContainerAPIClient) ContainerStatsOneShot(context.Context, string) (container.StatsResponseReader, error) {
+	return container.StatsResponseReader{}, nil
 }
 
 // ContainerStart is a mock implementation of Docker's client.ContainerAPIClient.ContainerStart()
@@ -246,21 +246,21 @@ func (c *ContainerAPIClient) ContainerWait(context.Context, string,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) CopyFromContainer(context.Context, string, string) (io.ReadCloser,
-	types.ContainerPathStat, error) {
-	return nil, types.ContainerPathStat{}, nil
+	container.PathStat, error) {
+	return nil, container.PathStat{}, nil
 }
 
 // CopyToContainer is a mock implementation of Docker's client.ContainerAPIClient.CopyToContainer()
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) CopyToContainer(context.Context, string, string, io.Reader,
-	types.CopyToContainerOptions) error {
+	container.CopyToContainerOptions) error {
 	return nil
 }
 
 // ContainersPrune is a mock implementation of Docker's client.ContainerAPIClient.ContainersPrune()
 //
 // TODO: properly implement
-func (c *ContainerAPIClient) ContainersPrune(context.Context, filters.Args) (types.ContainersPruneReport, error) {
-	return types.ContainersPruneReport{}, nil
+func (c *ContainerAPIClient) ContainersPrune(context.Context, filters.Args) (container.PruneReport, error) {
+	return container.PruneReport{}, nil
 }

@@ -1,8 +1,7 @@
 package dktest
 
 import (
-	"math/rand"
-	"time"
+	"math/rand/v2"
 )
 
 const (
@@ -10,17 +9,13 @@ const (
 	containerNamePrefix = "dktest_"
 )
 
-func init() {
-	rand.New(rand.NewSource(time.Now().UnixNano())) // nolint:gosec
-}
-
 func randString(n uint) string {
 	if n == 0 {
 		return ""
 	}
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))] // nolint:gosec
+		b[i] = chars[rand.IntN(len(chars))] // nolint:gosec
 	}
 	return string(b)
 }

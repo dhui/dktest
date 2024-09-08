@@ -68,13 +68,14 @@ func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, img
 	opts Options) (ContainerInfo, error) {
 	c := ContainerInfo{Name: genContainerName(), ImageName: imgName}
 	createResp, err := dc.ContainerCreate(ctx, &container.Config{
-		Image:      imgName,
-		Labels:     map[string]string{label: "true"},
-		Env:        opts.env(),
-		Entrypoint: opts.Entrypoint,
-		Cmd:        opts.Cmd,
-		Volumes:    opts.volumes(),
-		Hostname:   opts.Hostname,
+		Image:        imgName,
+		Labels:       map[string]string{label: "true"},
+		Env:          opts.env(),
+		Entrypoint:   opts.Entrypoint,
+		Cmd:          opts.Cmd,
+		Volumes:      opts.volumes(),
+		Hostname:     opts.Hostname,
+		ExposedPorts: opts.ExposedPorts,
 	}, &container.HostConfig{
 		PublishAllPorts: true,
 		PortBindings:    opts.PortBindings,

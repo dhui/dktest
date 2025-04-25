@@ -12,6 +12,8 @@ import (
 type Options struct {
 	// PullTimeout is the timeout used when pulling images
 	PullTimeout time.Duration
+	// PullRegistryAuth is the base64 encoded credentials for the registry
+	PullRegistryAuth string
 	// Timeout is the timeout used when starting a container and checking if it's ready
 	Timeout time.Duration
 	// ReadyTimeout is the timeout used for each container ready check.

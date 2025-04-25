@@ -31,11 +31,14 @@ const (
 	label = "dktest"
 )
 
-func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgName, platform string) error {
+func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, registryAuth, imgName, platform string) error {
 	lgr.Log("Pulling image:", imgName)
 	// lgr.Log(dc.ImageList(ctx, types.ImageListOptions{All: true}))
 
-	resp, err := dc.ImagePull(ctx, imgName, image.PullOptions{Platform: platform})
+	resp, err := dc.ImagePull(ctx, imgName, image.PullOptions{
+		Platform:     platform,
+		RegistryAuth: registryAuth,
+	})
 	if err != nil {
 		return err
 	}
@@ -202,7 +205,7 @@ func RunContext(ctx context.Context, logger Logger, imgName string, opts Options
 	pullCtx, pullTimeoutCancelFunc := context.WithTimeout(ctx, opts.PullTimeout)
 	defer pullTimeoutCancelFunc()
 
-	if err := pullImage(pullCtx, logger, dc, imgName, opts.Platform); err != nil {
+	if err := pullImage(pullCtx, logger, dc, opts.PullRegistryAuth, imgName, opts.Platform); err != nil {
 		return fmt.Errorf("error pulling image: %v error: %w", imgName, err)
 	}
 

@@ -63,7 +63,7 @@ func TestPullImage(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			client := tc.client
-			err := pullImage(ctx, t, &client, imageName, tc.platform)
+			err := pullImage(ctx, t, &client, "", imageName, tc.platform)
 			testErr(t, err, tc.expectErr)
 		})
 	}

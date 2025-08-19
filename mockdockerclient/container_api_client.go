@@ -19,7 +19,7 @@ type ContainerAPIClient struct {
 	StartErr    error
 	StopErr     error
 	RemoveErr   error
-	InspectResp *types.ContainerJSON
+	InspectResp *container.InspectResponse
 	Logs        io.ReadCloser
 }
 
@@ -37,8 +37,8 @@ func (c *ContainerAPIClient) ContainerAttach(context.Context, string,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerCommit(context.Context, string,
-	container.CommitOptions) (types.IDResponse, error) {
-	return types.IDResponse{}, nil
+	container.CommitOptions) (container.CommitResponse, error) {
+	return container.CommitResponse{}, nil
 }
 
 // ContainerCreate is a mock implementation of Docker's client.ContainerAPIClient.ContainerCreate()
@@ -70,8 +70,8 @@ func (c *ContainerAPIClient) ContainerExecAttach(context.Context, string,
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerExecCreate(context.Context, string,
-	container.ExecOptions) (types.IDResponse, error) {
-	return types.IDResponse{}, nil
+	container.ExecOptions) (container.ExecCreateResponse, error) {
+	return container.ExecCreateResponse{}, nil
 }
 
 // ContainerExecInspect is a mock implementation of Docker's client.ContainerAPIClient.ContainerExecInspect()
@@ -106,9 +106,9 @@ func (c *ContainerAPIClient) ContainerExport(context.Context, string) (io.ReadCl
 }
 
 // ContainerInspect is a mock implementation of Docker's client.ContainerAPIClient.ContainerInspect()
-func (c *ContainerAPIClient) ContainerInspect(context.Context, string) (types.ContainerJSON, error) {
+func (c *ContainerAPIClient) ContainerInspect(context.Context, string) (container.InspectResponse, error) {
 	if c.InspectResp == nil {
-		return types.ContainerJSON{}, Err
+		return container.InspectResponse{}, Err
 	}
 	return *c.InspectResp, nil
 }
@@ -117,8 +117,8 @@ func (c *ContainerAPIClient) ContainerInspect(context.Context, string) (types.Co
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerInspectWithRaw(context.Context, string,
-	bool) (types.ContainerJSON, []byte, error) {
-	return types.ContainerJSON{}, nil, nil
+	bool) (container.InspectResponse, []byte, error) {
+	return container.InspectResponse{}, nil, nil
 }
 
 // ContainerKill is a mock implementation of Docker's client.ContainerAPIClient.ContainerKill()
@@ -132,7 +132,7 @@ func (c *ContainerAPIClient) ContainerKill(context.Context, string, string) erro
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerList(context.Context,
-	container.ListOptions) ([]types.Container, error) {
+	container.ListOptions) ([]container.Summary, error) {
 	return nil, nil
 }
 
@@ -215,8 +215,8 @@ func (c *ContainerAPIClient) ContainerStop(context.Context, string, container.St
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerTop(context.Context, string,
-	[]string) (container.ContainerTopOKBody, error) {
-	return container.ContainerTopOKBody{}, nil
+	[]string) (container.TopResponse, error) {
+	return container.TopResponse{}, nil
 }
 
 // ContainerUnpause is a mock implementation of Docker's client.ContainerAPIClient.ContainerUnpause()
@@ -230,8 +230,8 @@ func (c *ContainerAPIClient) ContainerUnpause(context.Context, string) error {
 //
 // TODO: properly implement
 func (c *ContainerAPIClient) ContainerUpdate(context.Context, string,
-	container.UpdateConfig) (container.ContainerUpdateOKBody, error) {
-	return container.ContainerUpdateOKBody{}, nil
+	container.UpdateConfig) (container.UpdateResponse, error) {
+	return container.UpdateResponse{}, nil
 }
 
 // ContainerWait is a mock implementation of Docker's client.ContainerAPIClient.ContainerWait()

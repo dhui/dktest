@@ -133,6 +133,9 @@ func (c *ImageAPIClient) ImagesPrune(context.Context, filters.Args) (image.Prune
 	return image.PruneReport{}, nil
 }
 
+// ImageInspect is a mock implementation of Docker's client.ImageAPIClient.ImageInspect()
+//
+// TODO: properly implement
 func (c *ImageAPIClient) ImageInspect(context.Context, string, ...client.ImageInspectOption) (image.InspectResponse, error) {
 	return image.InspectResponse{}, nil
 }

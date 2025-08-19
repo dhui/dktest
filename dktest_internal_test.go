@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/dhui/dktest/mockdockerclient"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
 )
@@ -84,15 +83,15 @@ func TestRunImage(t *testing.T) {
 	}
 
 	successCreateResp := &container.CreateResponse{}
-	successInspectResp := &types.ContainerJSON{}
-	successInspectRespWithPortBindingNoIP := &types.ContainerJSON{NetworkSettings: &types.NetworkSettings{
-		NetworkSettingsBase: types.NetworkSettingsBase{Ports: portBindingsNoIP},
+	successInspectResp := &container.InspectResponse{}
+	successInspectRespWithPortBindingNoIP := &container.InspectResponse{NetworkSettings: &container.NetworkSettings{
+		NetworkSettingsBase: container.NetworkSettingsBase{Ports: portBindingsNoIP},
 	}}
-	successInspectRespWithPortBindingIPZeros := &types.ContainerJSON{NetworkSettings: &types.NetworkSettings{
-		NetworkSettingsBase: types.NetworkSettingsBase{Ports: portBindingsIPZeros},
+	successInspectRespWithPortBindingIPZeros := &container.InspectResponse{NetworkSettings: &container.NetworkSettings{
+		NetworkSettingsBase: container.NetworkSettingsBase{Ports: portBindingsIPZeros},
 	}}
-	successInspectRespWithPortBindingDiffIP := &types.ContainerJSON{NetworkSettings: &types.NetworkSettings{
-		NetworkSettingsBase: types.NetworkSettingsBase{Ports: portBindingsDiffIP},
+	successInspectRespWithPortBindingDiffIP := &container.InspectResponse{NetworkSettings: &container.NetworkSettings{
+		NetworkSettingsBase: container.NetworkSettingsBase{Ports: portBindingsDiffIP},
 	}}
 
 	testCases := []struct {

@@ -191,7 +191,7 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 
 // RunContext is similar to Run, but takes a parent context and returns an error and doesn't rely on a testing.T.
 func RunContext(ctx context.Context, logger Logger, imgName string, opts Options, testFunc func(ContainerInfo) error) (retErr error) {
-	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.41"))
+	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("error getting Docker client: %w", err)
 	}

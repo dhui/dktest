@@ -11,7 +11,7 @@ import (
 
 func mapHost(h string) string {
 	switch h {
-	case "", "0.0.0.0":
+	case "", "0.0.0.0", "::":
 		return "127.0.0.1"
 	default:
 		return h

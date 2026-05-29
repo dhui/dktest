@@ -3,10 +3,9 @@ package dktest
 import (
 	"fmt"
 	"strconv"
-)
 
-import (
 	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/api/types/network"
 )
 
 func mapHost(h string) string {
@@ -96,6 +95,31 @@ func portMapToStrings(portMap nat.PortMap) []string {
 		}
 	}
 	return portBindingStrs
+}
+
+// toNatPortMap converts a [network.PortMap] to a [nat.PortMap]. This is used to convert the Docker API
+// response back to nat types so the public [ContainerInfo] API remains stable.
+func toNatPortMap(m network.PortMap) nat.PortMap {
+	if len(m) == 0 {
+		return nil
+	}
+	out := make(nat.PortMap, len(m))
+	for p, bindings := range m {
+		natPort := nat.Port(p.String())
+		natBindings := make([]nat.PortBinding, len(bindings))
+		for i, b := range bindings {
+			hostIP := ""
+			if b.HostIP.IsValid() {
+				hostIP = b.HostIP.String()
+			}
+			natBindings[i] = nat.PortBinding{
+				HostIP:   hostIP,
+				HostPort: b.HostPort,
+			}
+		}
+		out[natPort] = natBindings
+	}
+	return out
 }
 
 // ContainerInfo holds information about a running Docker container

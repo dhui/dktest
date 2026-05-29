@@ -3,34 +3,48 @@ package mockdockerclient
 import (
 	"context"
 	"io"
+	"iter"
 
-	"github.com/docker/docker/api/types/build"
-	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/api/types/registry"
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/api/types/build"
+	"github.com/moby/moby/api/types/jsonstream"
+	"github.com/moby/moby/client"
 )
 
 var _ client.ImageAPIClient = (*ImageAPIClient)(nil)
 
 // ImageAPIClient is a mock implementation of the Docker's client.ImageAPIClient interface
 type ImageAPIClient struct {
-	PullResp io.ReadCloser
+	PullResp *MockImagePullResponse
+}
+
+// MockImagePullResponse is a mock implementation of the client.ImagePullResponse interface
+type MockImagePullResponse struct {
+	io.ReadCloser
+}
+
+// Wait implement interface
+func (ip *MockImagePullResponse) Wait(context.Context) error {
+	return nil
+}
+
+// JSONMessages implement interface
+func (ip *MockImagePullResponse) JSONMessages(context.Context) iter.Seq2[jsonstream.Message, error] {
+	return nil
 }
 
 // ImageBuild is a mock implementation of Docker's client.ImageAPIClient.ImageBuild()
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageBuild(context.Context, io.Reader,
-	build.ImageBuildOptions) (build.ImageBuildResponse, error) {
-	return build.ImageBuildResponse{}, nil
+	client.ImageBuildOptions) (client.ImageBuildResult, error) {
+	return client.ImageBuildResult{}, nil
 }
 
 // BuildCachePrune is a mock implementation of Docker's client.ImageAPIClient.BuildCachePrune()
 //
 // TODO: properly implement
 func (c *ImageAPIClient) BuildCachePrune(context.Context,
-	build.CachePruneOptions) (*build.CachePruneReport, error) {
+	client.BuildCachePruneOptions) (*build.CachePruneReport, error) {
 	return nil, nil
 }
 
@@ -39,52 +53,44 @@ func (c *ImageAPIClient) BuildCachePrune(context.Context,
 // TODO: properly implement
 func (c *ImageAPIClient) BuildCancel(context.Context, string) error { return nil }
 
-// ImageCreate is a mock implementation of Docker's client.ImageAPIClient.ImageCreate()
-//
-// TODO: properly implement
-func (c *ImageAPIClient) ImageCreate(context.Context, string,
-	image.CreateOptions) (io.ReadCloser, error) {
-	return nil, nil
-}
-
 // ImageHistory is a mock implementation of Docker's client.ImageAPIClient.ImageHistory()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageHistory(context.Context, string, ...client.ImageHistoryOption) ([]image.HistoryResponseItem, error) {
-	return nil, nil
+func (c *ImageAPIClient) ImageHistory(context.Context, string, ...client.ImageHistoryOption) (client.ImageHistoryResult, error) {
+	return client.ImageHistoryResult{}, nil
 }
 
 // ImageImport is a mock implementation of Docker's client.ImageAPIClient.ImageImport()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageImport(context.Context, image.ImportSource, string,
-	image.ImportOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImageImport(context.Context, client.ImageImportSource, string,
+	client.ImageImportOptions) (client.ImageImportResult, error) {
 	return nil, nil
 }
 
 // ImageInspectWithRaw is a mock implementation of Docker's client.ImageAPIClient.ImageInspectWithRaw()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageInspectWithRaw(context.Context, string) (image.InspectResponse, []byte, error) {
-	return image.InspectResponse{}, nil, nil
+func (c *ImageAPIClient) ImageInspectWithRaw(context.Context, string) (client.ImageInspectResult, []byte, error) {
+	return client.ImageInspectResult{}, nil, nil
 }
 
 // ImageList is a mock implementation of Docker's client.ImageAPIClient.ImageList()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageList(context.Context, image.ListOptions) ([]image.Summary, error) {
-	return nil, nil
+func (c *ImageAPIClient) ImageList(context.Context, client.ImageListOptions) (client.ImageListResult, error) {
+	return client.ImageListResult{}, nil
 }
 
 // ImageLoad is a mock implementation of Docker's client.ImageAPIClient.ImageLoad()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageLoad(context.Context, io.Reader, ...client.ImageLoadOption) (image.LoadResponse, error) {
-	return image.LoadResponse{}, nil
+func (c *ImageAPIClient) ImageLoad(context.Context, io.Reader, ...client.ImageLoadOption) (client.ImageLoadResult, error) {
+	return nil, nil
 }
 
 // ImagePull is a mock implementation of Docker's client.ImageAPIClient.ImagePull()
-func (c *ImageAPIClient) ImagePull(context.Context, string, image.PullOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImagePull(context.Context, string, client.ImagePullOptions) (client.ImagePullResponse, error) {
 	if c.PullResp == nil {
 		return nil, Err
 	}
@@ -94,7 +100,7 @@ func (c *ImageAPIClient) ImagePull(context.Context, string, image.PullOptions) (
 // ImagePush is a mock implementation of Docker's client.ImageAPIClient.ImagePush()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImagePush(context.Context, string, image.PushOptions) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImagePush(context.Context, string, client.ImagePushOptions) (client.ImagePushResponse, error) {
 	return nil, nil
 }
 
@@ -102,40 +108,42 @@ func (c *ImageAPIClient) ImagePush(context.Context, string, image.PushOptions) (
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageRemove(context.Context, string,
-	image.RemoveOptions) ([]image.DeleteResponse, error) {
-	return nil, nil
+	client.ImageRemoveOptions) (client.ImageRemoveResult, error) {
+	return client.ImageRemoveResult{}, nil
 }
 
 // ImageSearch is a mock implementation of Docker's client.ImageAPIClient.ImageSearch()
 //
 // TODO: properly implement
 func (c *ImageAPIClient) ImageSearch(context.Context, string,
-	registry.SearchOptions) ([]registry.SearchResult, error) {
-	return nil, nil
+	client.ImageSearchOptions) (client.ImageSearchResult, error) {
+	return client.ImageSearchResult{}, nil
 }
 
 // ImageSave is a mock implementation of Docker's client.ImageAPIClient.ImageSave()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageSave(context.Context, []string, ...client.ImageSaveOption) (io.ReadCloser, error) {
+func (c *ImageAPIClient) ImageSave(context.Context, []string, ...client.ImageSaveOption) (client.ImageSaveResult, error) {
 	return nil, nil
 }
 
 // ImageTag is a mock implementation of Docker's client.ImageAPIClient.ImageTag()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageTag(context.Context, string, string) error { return nil }
+func (c *ImageAPIClient) ImageTag(context.Context, client.ImageTagOptions) (client.ImageTagResult, error) {
+	return client.ImageTagResult{}, nil
+}
 
-// ImagesPrune is a mock implementation of Docker's client.ImageAPIClient.ImagesPrune()
+// ImagePrune is a mock implementation of Docker's client.ImageAPIClient.ImagesPrune()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImagesPrune(context.Context, filters.Args) (image.PruneReport, error) {
-	return image.PruneReport{}, nil
+func (c *ImageAPIClient) ImagePrune(context.Context, client.ImagePruneOptions) (client.ImagePruneResult, error) {
+	return client.ImagePruneResult{}, nil
 }
 
 // ImageInspect is a mock implementation of Docker's client.ImageAPIClient.ImageInspect()
 //
 // TODO: properly implement
-func (c *ImageAPIClient) ImageInspect(context.Context, string, ...client.ImageInspectOption) (image.InspectResponse, error) {
-	return image.InspectResponse{}, nil
+func (c *ImageAPIClient) ImageInspect(context.Context, string, ...client.ImageInspectOption) (client.ImageInspectResult, error) {
+	return client.ImageInspectResult{}, nil
 }

@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/network"
+	"github.com/moby/moby/client"
+	"github.com/moby/moby/client/pkg/jsonmessage"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 var (
@@ -31,12 +31,20 @@ const (
 	label = "dktest"
 )
 
-func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, registryAuth, imgName, platform string) error {
+func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, registryAuth string, imgName string, platform string) error {
 	lgr.Log("Pulling image:", imgName)
 	// lgr.Log(dc.ImageList(ctx, types.ImageListOptions{All: true}))
 
-	resp, err := dc.ImagePull(ctx, imgName, image.PullOptions{
-		Platform:     platform,
+	var platforms []v1.Platform
+	if len(platform) > 0 {
+		p, err := parsePlatform(platform)
+		if err != nil {
+			return err
+		}
+		platforms = []v1.Platform{p}
+	}
+	resp, err := dc.ImagePull(ctx, imgName, client.ImagePullOptions{
+		Platforms:    platforms,
 		RegistryAuth: registryAuth,
 	})
 	if err != nil {
@@ -62,7 +70,7 @@ func pullImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, regist
 func removeImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgName string) {
 	lgr.Log("Removing image:", imgName)
 
-	if _, err := dc.ImageRemove(ctx, imgName, image.RemoveOptions{Force: true, PruneChildren: true}); err != nil {
+	if _, err := dc.ImageRemove(ctx, imgName, client.ImageRemoveOptions{Force: true, PruneChildren: true}); err != nil {
 		lgr.Log("Failed to remove image: ", err.Error())
 	}
 }
@@ -70,30 +78,34 @@ func removeImage(ctx context.Context, lgr Logger, dc client.ImageAPIClient, imgN
 func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, imgName string,
 	opts Options) (ContainerInfo, error) {
 	c := ContainerInfo{Name: genContainerName(), ImageName: imgName}
-	createResp, err := dc.ContainerCreate(ctx, &container.Config{
-		Image:        imgName,
-		Labels:       map[string]string{label: "true"},
-		Env:          opts.env(),
-		Entrypoint:   opts.Entrypoint,
-		Cmd:          opts.Cmd,
-		Volumes:      opts.volumes(),
-		Hostname:     opts.Hostname,
-		ExposedPorts: opts.ExposedPorts,
-	}, &container.HostConfig{
-		PublishAllPorts: true,
-		PortBindings:    opts.PortBindings,
-		ShmSize:         opts.ShmSize,
-		Mounts:          opts.Mounts,
-	}, &network.NetworkingConfig{},
-		nil,
-		c.Name)
+	createResp, err := dc.ContainerCreate(ctx,
+		client.ContainerCreateOptions{
+			Config: &container.Config{
+				Image:        imgName,
+				Labels:       map[string]string{label: "true"},
+				Env:          opts.env(),
+				Entrypoint:   opts.Entrypoint,
+				Cmd:          opts.Cmd,
+				Volumes:      opts.volumes(),
+				Hostname:     opts.Hostname,
+				ExposedPorts: convertPortSet(opts.ExposedPorts),
+			},
+			HostConfig: &container.HostConfig{
+				PublishAllPorts: true,
+				PortBindings:    convertPortMap(opts.PortBindings),
+				ShmSize:         opts.ShmSize,
+				Mounts:          opts.Mounts,
+			},
+			NetworkingConfig: &network.NetworkingConfig{},
+			Name:             c.Name,
+		})
 	if err != nil {
 		return c, err
 	}
 	c.ID = createResp.ID
 	lgr.Log("Created container:", c.String())
 
-	if err := dc.ContainerStart(ctx, createResp.ID, container.StartOptions{}); err != nil {
+	if _, err := dc.ContainerStart(ctx, createResp.ID, client.ContainerStartOptions{}); err != nil {
 		return c, err
 	}
 	lgr.Log("Started container:", c.String())
@@ -102,16 +114,16 @@ func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, img
 		return c, nil
 	}
 
-	inspectResp, err := dc.ContainerInspect(ctx, c.ID)
+	inspectResp, err := dc.ContainerInspect(ctx, c.ID, client.ContainerInspectOptions{})
 	if err != nil {
 		return c, err
 	}
 	lgr.Log("Inspected container:", c.String())
 
-	if inspectResp.NetworkSettings == nil {
+	if inspectResp.Container.NetworkSettings == nil {
 		return c, errNoNetworkSettings
 	}
-	c.Ports = inspectResp.NetworkSettings.Ports
+	c.Ports = toNatPortMap(inspectResp.Container.NetworkSettings.Ports)
 
 	return c, nil
 }
@@ -119,7 +131,7 @@ func runImage(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, img
 func stopContainer(ctx context.Context, lgr Logger, dc client.ContainerAPIClient, c ContainerInfo,
 	logStdout, logStderr bool) {
 	if logStdout || logStderr {
-		if logs, err := dc.ContainerLogs(ctx, c.ID, container.LogsOptions{
+		if logs, err := dc.ContainerLogs(ctx, c.ID, client.ContainerLogsOptions{
 			Timestamps: true, ShowStdout: logStdout, ShowStderr: logStderr,
 		}); err == nil {
 			b, err := io.ReadAll(logs)
@@ -138,13 +150,13 @@ func stopContainer(ctx context.Context, lgr Logger, dc client.ContainerAPIClient
 		}
 	}
 
-	if err := dc.ContainerStop(ctx, c.ID, container.StopOptions{}); err != nil {
+	if _, err := dc.ContainerStop(ctx, c.ID, client.ContainerStopOptions{}); err != nil {
 		lgr.Log("Error stopping container:", c.String(), "error:", err)
 	}
 	lgr.Log("Stopped container:", c.String())
 
-	if err := dc.ContainerRemove(ctx, c.ID,
-		container.RemoveOptions{RemoveVolumes: true, Force: true}); err != nil {
+	if _, err := dc.ContainerRemove(ctx, c.ID,
+		client.ContainerRemoveOptions{RemoveVolumes: true, Force: true}); err != nil {
 		lgr.Log("Error removing container:", c.String(), "error:", err)
 	}
 	lgr.Log("Removed container:", c.String())
@@ -191,7 +203,7 @@ func Run(t *testing.T, imgName string, opts Options, testFunc func(*testing.T, C
 
 // RunContext is similar to Run, but takes a parent context and returns an error and doesn't rely on a testing.T.
 func RunContext(ctx context.Context, logger Logger, imgName string, opts Options, testFunc func(ContainerInfo) error) (retErr error) {
-	dc, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.41"))
+	dc, err := client.New(client.FromEnv)
 	if err != nil {
 		return fmt.Errorf("error getting Docker client: %w", err)
 	}

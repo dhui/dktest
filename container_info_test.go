@@ -2,14 +2,9 @@ package dktest_test
 
 import (
 	"testing"
-)
 
-import (
-	"github.com/docker/go-connections/nat"
-)
-
-import (
 	"github.com/dhui/dktest"
+	"github.com/docker/go-connections/nat"
 )
 
 func getTestContainerInfo(t *testing.T) dktest.ContainerInfo {

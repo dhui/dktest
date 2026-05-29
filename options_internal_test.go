@@ -1,11 +1,12 @@
 package dktest
 
 import (
+	"net/netip"
 	"testing"
 	"time"
-)
 
-import (
+	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/api/types/network"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -68,6 +69,82 @@ func TestOptionsEnv(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			opts := Options{Env: tc.env}
 			assert.ElementsMatch(t, tc.expectedEnv, opts.env(), "Options environment to match expected")
+		})
+	}
+}
+
+func TestConvertPortSet(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    nat.PortSet
+		expected network.PortSet
+	}{
+		{name: "nil", input: nil, expected: nil},
+		{name: "empty", input: nat.PortSet{}, expected: nil},
+		{name: "single port", input: nat.PortSet{
+			"80/tcp": {},
+		}, expected: network.PortSet{
+			network.MustParsePort("80/tcp"): {},
+		}},
+		{name: "multiple ports", input: nat.PortSet{
+			"80/tcp": {},
+			"53/udp": {},
+		}, expected: network.PortSet{
+			network.MustParsePort("80/tcp"): {},
+			network.MustParsePort("53/udp"): {},
+		}},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := convertPortSet(tc.input)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestConvertPortMap(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    nat.PortMap
+		expected network.PortMap
+	}{
+		{name: "nil", input: nil, expected: nil},
+		{name: "empty", input: nat.PortMap{}, expected: nil},
+		{name: "single port no host ip", input: nat.PortMap{
+			"80/tcp": {{HostPort: "8080"}},
+		}, expected: network.PortMap{
+			network.MustParsePort("80/tcp"): {{HostPort: "8080"}},
+		}},
+		{name: "with host ip", input: nat.PortMap{
+			"80/tcp": {{HostIP: "10.0.0.1", HostPort: "8080"}},
+		}, expected: network.PortMap{
+			network.MustParsePort("80/tcp"): {{HostIP: netip.MustParseAddr("10.0.0.1"), HostPort: "8080"}},
+		}},
+		{name: "with 0.0.0.0", input: nat.PortMap{
+			"80/tcp": {{HostIP: "0.0.0.0", HostPort: "8080"}},
+		}, expected: network.PortMap{
+			network.MustParsePort("80/tcp"): {{HostIP: netip.MustParseAddr("0.0.0.0"), HostPort: "8080"}},
+		}},
+		{name: "multiple ports and bindings", input: nat.PortMap{
+			"80/tcp": {
+				{HostPort: "8080"},
+				{HostIP: "192.168.1.1", HostPort: "9090"},
+			},
+			"53/udp": {{HostPort: "5353"}},
+		}, expected: network.PortMap{
+			network.MustParsePort("80/tcp"): {
+				{HostPort: "8080"},
+				{HostIP: netip.MustParseAddr("192.168.1.1"), HostPort: "9090"},
+			},
+			network.MustParsePort("53/udp"): {{HostPort: "5353"}},
+		}},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := convertPortMap(tc.input)
+			assert.Equal(t, tc.expected, result)
 		})
 	}
 }

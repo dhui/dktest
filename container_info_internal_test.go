@@ -1,10 +1,12 @@
 package dktest
 
 import (
+	"net/netip"
 	"strconv"
 	"testing"
 
 	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/api/types/network"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -147,6 +149,59 @@ func TestPortMapToStrings(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			s := portMapToStrings(tc.portMap)
 			assert.Equal(t, tc.expected, s)
+		})
+	}
+}
+
+func TestToNatPortMap(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    network.PortMap
+		expected nat.PortMap
+	}{
+		{name: "nil", input: nil, expected: nil},
+		{name: "empty", input: network.PortMap{}, expected: nil},
+		{name: "single port", input: network.PortMap{
+			network.MustParsePort("80/tcp"): {{HostPort: "8080"}},
+		}, expected: nat.PortMap{
+			"80/tcp": {{HostIP: "", HostPort: "8080"}},
+		}},
+		{name: "with host ip", input: network.PortMap{
+			network.MustParsePort("80/tcp"): {{HostIP: netip.MustParseAddr("10.0.0.1"), HostPort: "8080"}},
+		}, expected: nat.PortMap{
+			"80/tcp": {{HostIP: "10.0.0.1", HostPort: "8080"}},
+		}},
+		{name: "with zero ip", input: network.PortMap{
+			network.MustParsePort("80/tcp"): {{HostIP: netip.MustParseAddr("0.0.0.0"), HostPort: "8080"}},
+		}, expected: nat.PortMap{
+			"80/tcp": {{HostIP: "0.0.0.0", HostPort: "8080"}},
+		}},
+		{name: "multiple ports", input: network.PortMap{
+			network.MustParsePort("80/tcp"):  {{HostPort: "8080"}},
+			network.MustParsePort("443/tcp"): {{HostPort: "8443"}},
+			network.MustParsePort("53/udp"):  {{HostPort: "5353"}},
+		}, expected: nat.PortMap{
+			"80/tcp":  {{HostIP: "", HostPort: "8080"}},
+			"443/tcp": {{HostIP: "", HostPort: "8443"}},
+			"53/udp":  {{HostIP: "", HostPort: "5353"}},
+		}},
+		{name: "multiple bindings per port", input: network.PortMap{
+			network.MustParsePort("80/tcp"): {
+				{HostPort: "8080"},
+				{HostIP: netip.MustParseAddr("192.168.1.1"), HostPort: "9090"},
+			},
+		}, expected: nat.PortMap{
+			"80/tcp": {
+				{HostIP: "", HostPort: "8080"},
+				{HostIP: "192.168.1.1", HostPort: "9090"},
+			},
+		}},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := toNatPortMap(tc.input)
+			assert.Equal(t, tc.expected, result)
 		})
 	}
 }

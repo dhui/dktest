@@ -127,8 +127,8 @@ Last updated: 2020/01/03
 
 #### Why `dktest` is better
 
-* Uses the [official Docker SDK](https://github.com/docker/docker)
-  * [docker/docker](https://github.com/docker/docker) (aka [moby/moby](https://github.com/moby/moby)) uses [import path checking](https://golang.org/cmd/go/#hdr-Import_path_checking), so needs to be imported as `github.com/docker/docker`
+* Uses the [official Docker SDK](https://github.com/moby/moby)
+  * [moby/moby](https://github.com/moby/moby) uses [import path checking](https://golang.org/cmd/go/#hdr-Import_path_checking), so needs to be imported as `github.com/moby/moby`
 * Designed to run in the Go testing environment
   * Smaller API surface
   * Running Docker containers are automatically cleaned up

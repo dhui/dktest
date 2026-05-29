@@ -3,12 +3,14 @@ package dktest
 import (
 	"context"
 	"io"
+	"net/netip"
 	"testing"
 	"time"
 
 	"github.com/dhui/dktest/mockdockerclient"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/network"
+	"github.com/moby/moby/client"
 )
 
 const (
@@ -42,57 +44,54 @@ func TestPullImage(t *testing.T) {
 		expectErr bool
 	}{
 		{name: "success", client: mockdockerclient.ImageAPIClient{
-			PullResp: mockdockerclient.MockReadCloser{MockReader: successReader}}, expectErr: false},
+			PullResp: &mockdockerclient.MockImagePullResponse{ReadCloser: mockdockerclient.MockReadCloser{MockReader: successReader}}}, expectErr: false},
 		{name: "with specific platform", client: mockdockerclient.ImageAPIClient{
-			PullResp: mockdockerclient.MockReadCloser{MockReader: successReader}},
-			platform: "linux/x86_64", expectErr: false},
+			PullResp: &mockdockerclient.MockImagePullResponse{ReadCloser: mockdockerclient.MockReadCloser{MockReader: successReader}}},
+			platform: "linux/amd64", expectErr: false},
 		{name: "pull error", client: mockdockerclient.ImageAPIClient{}, expectErr: true},
 		{name: "read error", client: mockdockerclient.ImageAPIClient{
-			PullResp: mockdockerclient.MockReadCloser{
+			PullResp: &mockdockerclient.MockImagePullResponse{ReadCloser: mockdockerclient.MockReadCloser{
 				MockReader: mockdockerclient.MockReader{Err: mockdockerclient.Err},
-			}}, expectErr: false},
+			}}}, expectErr: false},
 		{name: "close error", client: mockdockerclient.ImageAPIClient{
-			PullResp: mockdockerclient.MockReadCloser{
+			PullResp: &mockdockerclient.MockImagePullResponse{ReadCloser: mockdockerclient.MockReadCloser{
 				MockReader: successReader,
 				MockCloser: mockdockerclient.MockCloser{Err: mockdockerclient.Err},
-			}}, expectErr: false},
+			}}}, expectErr: false},
 	}
 
 	ctx := context.Background()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			client := tc.client
-			err := pullImage(ctx, t, &client, "", imageName, tc.platform)
+			c := tc.client
+			err := pullImage(ctx, t, &c, "", imageName, tc.platform)
 			testErr(t, err, tc.expectErr)
 		})
 	}
 }
 
 func TestRunImage(t *testing.T) {
-	_, portBindingsNoIP, err := nat.ParsePortSpecs([]string{"8181:80"})
-	if err != nil {
-		t.Fatal("Error parsing port bindings:", err)
+	portBindingsNoIP := network.PortMap{
+		network.MustParsePort("80/tcp"): []network.PortBinding{{HostPort: "8181"}},
 	}
-	_, portBindingsIPZeros, err := nat.ParsePortSpecs([]string{"0.0.0.0:8181:80"})
-	if err != nil {
-		t.Fatal("Error parsing port bindings:", err)
+	portBindingsIPZeros := network.PortMap{
+		network.MustParsePort("80/tcp"): []network.PortBinding{{HostIP: netip.MustParseAddr("0.0.0.0"), HostPort: "8181"}},
 	}
-	_, portBindingsDiffIP, err := nat.ParsePortSpecs([]string{"10.0.0.1:8181:80"})
-	if err != nil {
-		t.Fatal("Error parsing port bindings:", err)
+	portBindingsDiffIP := network.PortMap{
+		network.MustParsePort("80/tcp"): []network.PortBinding{{HostIP: netip.MustParseAddr("10.0.0.1"), HostPort: "8181"}},
 	}
 
-	successCreateResp := &container.CreateResponse{}
-	successInspectResp := &container.InspectResponse{}
-	successInspectRespWithPortBindingNoIP := &container.InspectResponse{NetworkSettings: &container.NetworkSettings{
-		NetworkSettingsBase: container.NetworkSettingsBase{Ports: portBindingsNoIP},
-	}}
-	successInspectRespWithPortBindingIPZeros := &container.InspectResponse{NetworkSettings: &container.NetworkSettings{
-		NetworkSettingsBase: container.NetworkSettingsBase{Ports: portBindingsIPZeros},
-	}}
-	successInspectRespWithPortBindingDiffIP := &container.InspectResponse{NetworkSettings: &container.NetworkSettings{
-		NetworkSettingsBase: container.NetworkSettingsBase{Ports: portBindingsDiffIP},
-	}}
+	successCreateResp := &client.ContainerCreateResult{}
+	successInspectResp := &client.ContainerInspectResult{}
+	successInspectRespWithPortBindingNoIP := &client.ContainerInspectResult{Container: container.InspectResponse{NetworkSettings: &container.NetworkSettings{
+		Ports: portBindingsNoIP,
+	}}}
+	successInspectRespWithPortBindingIPZeros := &client.ContainerInspectResult{Container: container.InspectResponse{NetworkSettings: &container.NetworkSettings{
+		Ports: portBindingsIPZeros,
+	}}}
+	successInspectRespWithPortBindingDiffIP := &client.ContainerInspectResult{Container: container.InspectResponse{NetworkSettings: &container.NetworkSettings{
+		Ports: portBindingsDiffIP,
+	}}}
 
 	testCases := []struct {
 		name      string
